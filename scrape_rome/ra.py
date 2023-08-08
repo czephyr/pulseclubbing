@@ -49,13 +49,13 @@ def scrape(dataframe):
                 "aggregations": [],
                 "filters": [{"type": "CLUB", "value": club_value},
                             {"type": "DATERANGE", "value": f"{{\"gte\":\"{date.today().strftime('%Y-%m-%dT00:00:00.000Z')}\"}}"}, 
-                            {"type": "DATERANGE", "value": f"{{\"lte\":\"{(date.today() + relativedelta(day=+31)).strftime('%Y-%m-%dT00:00:00.000Z')}\"}}"}
+                            {"type": "DATERANGE", "value": f"{{\"lte\":\"{(date.today() + relativedelta(months=+1, day=+31)).strftime('%Y-%m-%dT00:00:00.000Z')}\"}}"}
                             ],
                 "sortOrder": "ASCENDING",
                 "sortField": "DATE",
                 "baseFilters": [{"type": "CLUB", "value": club_value},
                                 {"type": "DATERANGE", "value": f"{{\"gte\":\"{date.today().strftime('%Y-%m-%dT00:00:00.000Z')}\"}}"},
-                                {"type": "DATERANGE", "value": f"{{\"lte\":\"{(date.today() + relativedelta(day=+31)).strftime('%Y-%m-%dT00:00:00.000Z')}\"}}"}
+                                {"type": "DATERANGE", "value": f"{{\"lte\":\"{(date.today() + relativedelta(months=+1, day=+31)).strftime('%Y-%m-%dT00:00:00.000Z')}\"}}"}
                                 ]
             },
             "query":"query GET_DEFAULT_EVENTS_LISTING($indices: [IndexType!], $aggregations: [ListingAggregationType!], $filters: [FilterInput], $pageSize: Int, $page: Int, $sortField: FilterSortFieldType, $sortOrder: FilterSortOrderType, $baseFilters: [FilterInput]) {\n  listing(indices: $indices, aggregations: [], filters: $filters, pageSize: $pageSize, page: $page, sortField: $sortField, sortOrder: $sortOrder) {\n    data {\n      ...eventFragment\n      __typename\n    }\n    totalResults\n    __typename\n  }\n  aggregations: listing(indices: $indices, aggregations: $aggregations, filters: $baseFilters, pageSize: 0, sortField: $sortField, sortOrder: $sortOrder) {\n    aggregations {\n      type\n      values {\n        value\n        name\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment eventFragment on IListingItem {\n  ... on Event {\n    id\n    title\n    attending\n    date\n    startTime\n    contentUrl\n    queueItEnabled\n    flyerFront\n    newEventForm\n    images {\n      id\n      filename\n      alt\n      type\n      crop\n      __typename\n    }\n    artists {\n      id\n      name\n      __typename\n    }\n    venue {\n      id\n      name\n      contentUrl\n      live\n      area {\n        id\n        name\n        urlName\n        country {\n          id\n          name\n          urlCode\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    pick {\n      id\n      blurb\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n"
