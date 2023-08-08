@@ -1,8 +1,6 @@
 import requests
 import pandas as pd
-import os
 from bs4 import BeautifulSoup
-import lxml
 from datetime import datetime, date
 
 def scrape(dataframe):
