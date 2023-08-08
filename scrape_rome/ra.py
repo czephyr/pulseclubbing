@@ -93,7 +93,6 @@ def scrape(dataframe):
 
     # Creating a DataFrame from the flattened events
     ra_df = pd.DataFrame(flattened_events)
-    print(ra_df.tail())
     ra_df = ra_df[['startTime', 'title', 'venue_name', 'contentUrl']].copy()
     ra_df['startTime'] = pd.to_datetime(ra_df['startTime']).dt.strftime('%Y-%m-%d %H:%M:%S')
     ra_df['contentUrl'] = 'https://ra.co' + ra_df['contentUrl']

@@ -71,7 +71,6 @@ if __name__ == '__main__':
     df = pd.DataFrame()
     df = fanfulla.scrape(df)
     df = ra.scrape(df)
-    print(df.tail())
     current_month_name = datetime.now().strftime('%B').lower()
     merge_events(df, current_month_name)
     update_webpage(current_month_name,"www/gen_index.html")
