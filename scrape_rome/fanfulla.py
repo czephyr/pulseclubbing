@@ -3,6 +3,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime, date
 
+platforms = ['bandcamp', 'soundcloud', 'spotify', 'youtube', 'mixcloud']
+
 def scrape(dataframe):
     html = requests.get("http://www.fanfulla5a.it/2023/06/01/programma-giugno-2023/").content
     soup = BeautifulSoup(html, "lxml")
@@ -27,7 +29,10 @@ def scrape(dataframe):
         except Exception as e:
             print('error parsing date @ Fanfulla', e)
             continue
-        event_dict["url"] = event.find_all('a')[-1]['href']
+        urls = [a['href'] for a in event.find_all('a', href=True) if 'facebook' in a['href'] and 'event' in a['href']]
+        event_dict['url'] = urls[0] if urls else None
+        links = [a['href'] for a in event.find_all('a', href=True) if any(platform in a['href'] for platform in platforms)]
+        event_dict['artists_links'] = '; '.join(links)
         events_list.append(event_dict)
     fanfulla_events = pd.DataFrame(events_list)
     return pd.concat([dataframe, fanfulla_events[['date_and_time', 'name', 'location', 'url']]])

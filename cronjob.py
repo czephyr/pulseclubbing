@@ -14,7 +14,7 @@ def merge_events(scraped_df):
 
 def update_webpage(file_to_write:str):
     current_year = datetime.now().strftime('%Y')
-    current_month_n = datetime.now().strftime('%-m')
+    current_month_n = int(datetime.now().strftime('%m'))
     df = pd.read_csv(f'data/{current_year}/{current_month_n}.csv', parse_dates=['date_and_time'])
 
     html_content = '''<!DOCTYPE html>

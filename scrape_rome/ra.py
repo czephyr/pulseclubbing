@@ -7,7 +7,10 @@ from dateutil.relativedelta import relativedelta
 
 CLUBS = { # IDs must be strings to perform the request correctly
     'forte-antenne': '190667',
-    'hotel-butterfly': '139767'
+    'hotel-butterfly': '139767',
+    'wood-natural-bar': '216590',
+    'cieloterra': '165998',
+    'andrea-doria': '32487',
 }
 
 def scrape(dataframe):
