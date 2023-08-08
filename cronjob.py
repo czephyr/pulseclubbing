@@ -1,33 +1,6 @@
 import pandas as pd
 from datetime import datetime,date
-import os
-from bs4 import BeautifulSoup
-import lxml
-import requests
-
-def scrape_logic():
-    html = requests.get("http://www.fanfulla5a.it/2023/06/01/programma-giugno-2023/").content
-    soup = BeautifulSoup(html, "lxml")
-
-    events = soup.find_all('div', class_='siteorigin-widget-tinymce')
-    events_list = []
-    for event in events:
-        event_dict = {}
-        try:
-            day = event.find('h3').text.split(' ')[1]
-            day = datetime.strptime(f'{day} {datetime.now().month} {datetime.now().year}', '%d %m %Y')
-        except Exception as e:
-            print(e)
-            continue
-        event_dict["title"] = event.find('h4').text
-        event_dict["location"] = 'Fanfulla 5/A Circolo Arci'
-        time = event.find('span', class_='_4n-j fsl').text.split('dalle ore ')[1]
-        time = datetime.strptime(time, '%H').strftime('%H:%M')
-        event_dict["date_and_time"] = day.replace(hour=int(time.split(':')[0]), minute=int(time.split(':')[1]))
-        event_dict["url"] = event.find_all('a')[-1]['href']
-        events_list.append(event_dict)
-    df = pd.DataFrame(events_list)
-    return df[['date_and_time', 'title', 'location', 'url']]
+from scrape_rome import fanfulla, ra
 
 def merge_events(scraped_df,month_name):
     # TODO: gestione dei file per mese????
@@ -74,7 +47,7 @@ def update_webpage(month_name,file_to_write:str):
             for _, row in group.iterrows():
                 html_content += f'''
                         <li class="list-group-item">
-                            <a href="{row['url']}">{row['location']} - {row['title']}</a>
+                            <a href="{row['url']}">{row['location']} - {row['name']}</a>
                         </li>'''
 
             html_content += '''
@@ -95,7 +68,10 @@ def update_webpage(month_name,file_to_write:str):
         file.write(html_content)
 
 if __name__ == '__main__':
-    df = scrape_logic()
+    df = pd.DataFrame()
+    df = fanfulla.scrape(df)
+    df = ra.scrape(df)
+    print(df.tail())
     current_month_name = datetime.now().strftime('%B').lower()
     merge_events(df, current_month_name)
     update_webpage(current_month_name,"www/gen_index.html")
