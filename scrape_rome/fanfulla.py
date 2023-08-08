@@ -23,7 +23,7 @@ def scrape(dataframe):
         event_dict["location"] = 'Fanfulla 5/A Circolo Arci'
         time = event.find('span', class_='_4n-j fsl').text.split('dalle ore ')[1]
         time = datetime.strptime(time, '%H').strftime('%H:%M')
-        event_dict["date_and_time"] = day.replace(hour=int(time.split(':')[0]), minute=int(time.split(':')[1]))
+        event_dict["date_and_time"] = day.replace(hour=int(time.split(':')[0]), minute=int(time.split(':')[1])).dt.strftime('%Y-%m-%d %H:%M:%S')
         event_dict["url"] = event.find_all('a')[-1]['href']
         events_list.append(event_dict)
     fanfulla_events = pd.DataFrame(events_list)

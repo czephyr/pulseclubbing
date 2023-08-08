@@ -7,7 +7,8 @@ def merge_events(scraped_df,month_name):
     # current = pd.read_csv(f'data/{month_name}.csv')
     current = pd.read_csv(f'data/events.csv')
     concat = pd.concat([current, scraped_df])
-    concat.drop_duplicates().to_csv(f'data/events.csv',index=False)
+    concat.drop_duplicates(inplace=True)
+    concat.to_csv(f'data/events.csv',index=False)
     #os.remove('data/new.csv')
 
 def update_webpage(month_name,file_to_write:str):
