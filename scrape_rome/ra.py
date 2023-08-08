@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import time
 
-CLUBS = { # ids must be strings to perform the request correctly
+CLUBS = { # IDs must be strings to perform the request correctly
     'forte-antenne': '190667',
     'hotel-butterfly': '139767'
 }
@@ -41,7 +41,7 @@ def scrape(dataframe):
             "operationName": "GET_DEFAULT_EVENTS_LISTING",
             "variables": {
                 "indices": ["EVENT"],
-                "pageSize": 20,
+                "pageSize": 20, # Maximum number of events per page
                 "page": 1,
                 "aggregations": [],
                 "filters": [{"type": "CLUB", "value": club_value},

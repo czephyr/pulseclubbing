@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from datetime import datetime,date
 from scrape_rome import fanfulla, ra
 
@@ -12,7 +13,7 @@ def merge_events(scraped_df,month_name):
     #os.remove('data/new.csv')
 
 def update_webpage(month_name,file_to_write:str):
-    df = pd.read_csv(f'data/events.csv')
+    df = pd.read_csv(f'data/events.csv', parse_dates=['date_and_time'])
 
     html_content = '''<!DOCTYPE html>
     <html lang="en">
@@ -31,11 +32,11 @@ def update_webpage(month_name,file_to_write:str):
         <div class="container">'''
 
     # Iterate over the unique dates and group the events by date
-    for time, group in df.groupby('date_and_time'):
+    for time, group in df.groupby(df['date_and_time'].dt.date):
         current_date = date.today()
 
         # Compare the dates
-        if datetime.strptime(time, '%Y-%m-%d %H:%M:%S').date() >= current_date and datetime.strptime(time, '%Y-%m-%d %H:%M:%S').date().month == current_date.month:
+        if time.day >= current_date.day and time.month == current_date.month and time.year == current_date.year:
             # Format the date as "Month day" (e.g., "August 4th")
             formatted_date = pd.to_datetime(time).strftime('%B %d')
             html_content += f'''
@@ -65,10 +66,13 @@ def update_webpage(month_name,file_to_write:str):
     </html>'''
 
     # Write the HTML content to a file
-    with open(file_to_write, 'w') as file:
+    with open(file_to_write, 'w', encoding='utf-8') as file:
         file.write(html_content)
-
+    
 if __name__ == '__main__':
+    if not os.path.exists('data/events.csv'):
+        empty_df = pd.DataFrame(columns=['date_and_time', 'name', 'location', 'url'])
+        empty_df.to_csv('data/events.csv', index=False)
     df = pd.DataFrame()
     df = fanfulla.scrape(df)
     df = ra.scrape(df)

@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from bs4 import BeautifulSoup
 import lxml
-from datetime import datetime,date
+from datetime import datetime, date
 
 def scrape(dataframe):
     html = requests.get("http://www.fanfulla5a.it/2023/06/01/programma-giugno-2023/").content
@@ -14,7 +14,8 @@ def scrape(dataframe):
     for event in events:
         event_dict = {}
         try:
-            day = event.find('h3').text.split(' ')[1]
+            day = event.find('h3').text.strip()
+            day = ''.join(filter(str.isdigit, day))
             day = datetime.strptime(f'{day} {datetime.now().month} {datetime.now().year}', '%d %m %Y')
         except Exception as e:
             print(e)
@@ -23,7 +24,11 @@ def scrape(dataframe):
         event_dict["location"] = 'Fanfulla 5/A Circolo Arci'
         time = event.find('span', class_='_4n-j fsl').text.split('dalle ore ')[1]
         time = datetime.strptime(time, '%H').strftime('%H:%M')
-        event_dict["date_and_time"] = day.replace(hour=int(time.split(':')[0]), minute=int(time.split(':')[1])).dt.strftime('%Y-%m-%d %H:%M:%S')
+        try: 
+            event_dict['date_and_time'] = day.strftime('%Y-%m-%d') + ' ' + time + ':00'
+        except Exception as e:
+            print('error parsing date @ Fanfulla', e)
+            continue
         event_dict["url"] = event.find_all('a')[-1]['href']
         events_list.append(event_dict)
     fanfulla_events = pd.DataFrame(events_list)
