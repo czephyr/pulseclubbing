@@ -1,0 +1,4 @@
+- deployment is currently pulling in a folder in the home, then copying the files to the other folder, sucks
+- add telegram interface to add manually events
+- esthetic!
+- integrate streaming platforms links or embeds (see fanfulla artists_links field)

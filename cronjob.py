@@ -3,17 +3,19 @@ import os
 from datetime import datetime,date
 from scrape_rome import fanfulla, ra
 
-def merge_events(scraped_df,month_name):
-    # TODO: gestione dei file per mese????
-    # current = pd.read_csv(f'data/{month_name}.csv')
-    current = pd.read_csv(f'data/events.csv')
-    concat = pd.concat([current, scraped_df])
-    concat.drop_duplicates(inplace=True)
-    concat.to_csv(f'data/events.csv',index=False)
-    #os.remove('data/new.csv')
+def merge_events(scraped_df):
+    current_year = datetime.now().strftime('%Y')
+    scraped_df['date_and_time'] = pd.to_datetime(scraped_df['date_and_time'])
+    for month, scraped_by_month in scraped_df.groupby(scraped_df['date_and_time'].dt.month):
+        stored_df = pd.read_csv(f'data/{current_year}/{month}.csv',parse_dates=["date_and_time"])
+        concat = pd.concat([stored_df, scraped_by_month])
+        concat.drop_duplicates(inplace=True)
+        concat.to_csv(f'data/{current_year}/{month}.csv',index=False)
 
-def update_webpage(month_name,file_to_write:str):
-    df = pd.read_csv(f'data/events.csv', parse_dates=['date_and_time'])
+def update_webpage(file_to_write:str):
+    current_year = datetime.now().strftime('%Y')
+    current_month_n = int(datetime.now().strftime('%m'))
+    df = pd.read_csv(f'data/{current_year}/{current_month_n}.csv', parse_dates=['date_and_time'])
 
     html_content = '''<!DOCTYPE html>
     <html lang="en">
@@ -76,6 +78,5 @@ if __name__ == '__main__':
     df = pd.DataFrame()
     df = fanfulla.scrape(df)
     df = ra.scrape(df)
-    current_month_name = datetime.now().strftime('%B').lower()
-    merge_events(df, current_month_name)
-    update_webpage(current_month_name,"www/gen_index.html")
+    merge_events(df)
+    update_webpage("www/gen_index.html")
