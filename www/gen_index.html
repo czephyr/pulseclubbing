@@ -1,259 +1,247 @@
-<!DOCTYPE html>
+
+    <!DOCTYPE html>
     <html lang="en">
-
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Links of the Month</title>
+    <style>
 
-        <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+
+    :root {
+        --width: 800px;
+        --font-main: 'Fira Code', monospace;
+        --font-secondary: 'Fira Code', monospace;
+        --font-scale: 1.3em;
+        --background-color: #000;
+        --heading-color: #0099FF;
+        --text-color: #0099FF;
+        --link-color: #0099FF;
+        --visited-color: #0088CC;
+        --suggested-event-color: #9C27B0;
+    }
+
+    body {
+        font-family: var(--font-secondary);
+        font-size: var(--font-scale);
+        margin: auto;
+        padding: 20px;
+        max-width: var(--width);
+        text-align: left;
+        background-color: var(--background-color);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.5;
+        color: var(--text-color);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-main);
+        color: var(--heading-color);
+        line-height:1.1;
+    }
+
+    a {
+        color: var(--link-color);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    main {
+        /*margin-top: 40px;*/
+        margin-bottom: 20px;
+        padding: 30px;
+        border: 3px solid var(--text-color);
+        border-top:none;
+        line-height: 1.6;
+    }
+
+    nav {
+      background: var(--text-color);
+      /* text-transform: uppercase; */
+      letter-spacing: 0.3em;
+    }
+
+    nav > p {
+      margin: 0;
+      padding: 10px 32px;
+    }
+
+    nav a {
+        margin-right: 8px;
+        font-size: .7em;
+        color:var(--background-color);
+        text-decoration:none;
+    }
+
+    strong,
+    b {
+        color: var(--heading-color);
+    }
+
+    button {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    hr {
+        border: 0;
+        border-top: 1px dashed;
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    footer {
+        padding: 25px 0;
+        text-align: center;
+        opacity: 0.6;
+    }
+
+    .title:hover {
+        text-decoration: none;
+    }
+
+    .title h1 {
+        font-size: 2em;
+        color: var(--text-color);
+        font-weight: 400;
+        text-align:center;
+    }
+
+    .inline {
+        width: auto !important;
+    }
+
+    /* blog post list */
+    ul.blog-posts {
+        list-style-type: none;
+        padding: unset;
+    }
+
+    ul.blog-posts li {
+        display: flex;
+        margin-bottom: 20px;
+        flex-wrap:wrap;
+    }
+
+    ul.blog-posts li time {
+        font-style: normal;
+        font-size:.7em;
+        font-weight:bold;
+    }
+
+    ul.blog-posts li span {
+        flex: 0 0 100%;
+    }
+
+    ul.blog-posts li a:visited {
+        color: var(--visited-color);
+    }
+
+    table {
+        border-collapse: collapse;
+    }
+
+    table,
+    th,
+    td {
+        border: 1px dashed var(--heading-color);
+        padding: 10px;
+    }
+
+    @media only screen and (max-width:767px) {
+        main {
+            padding: 20px;
+            margin-top: 0px;
+            margin-bottom: 10px;
+        }
+
+        ul.blog-posts li {
+            flex-direction: column;
+        }
+
+        ul.blog-posts li span {
+            flex: unset;
+        }
+    }
+    </style>
     </head>
+    
+    <body class="blog">
+    <header>
+        <a class="title" href="/">
+            <h1>(((Pulse)))</h1>
+        </a>
+        <nav>
+            <p><a href="/">{home}</a> <a href="/next_month.html">{next_month}</a> <a href="/past_events.html">{past_events}</a></p>
+        </nav>
+    </header>
 
-    <body>
-        <h1 class="mt-4 mb-4">Links of the Month</h1>
-        <div class="container">
+    <main>
+        <ul class="blog-posts">
+    
                 <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 08</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/962475938223899/">Fanfulla 5/A Circolo Arci - FEMININE dj set</a>
+                <div>
+                    <h5>August 28</h5>
+                    <ul>
+                        <li>
+                            <a href="https://www.facebook.com/events/969876017535558/" target="_blank">Fanfulla 5/A Circolo Arci - NED ENSEMBLE (Collettivo di improvvisazione) + Perilongu & RoMauro dj set</a>
+                        </li>
+                        <li>
+                            <a href="https://ra.co/events/1762155" target="_blank">Hotel Butterfly - Yokho Tribe: Fresco Edits, Les Inferno, Yaya, Senor Cezar</a>
                         </li>
                     </ul>
                 </div>
-                <!-- End of day block -->
                 <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 09</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/580530394210955">Fanfulla 5/A Circolo Arci - PENINSULAR SNACK Vol.2: Alfonso Bravo Gallo Lento (live) - UK/ES + Estades (dj) - ES</a>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="https://ra.co/events/1752451">Hotel Butterfly - Electronic Garden: Francesco Maria, Daniele Pavoni, Diana, ADELAID</a>
+                <div>
+                    <h5>August 29</h5>
+                    <ul>
+                        <li>
+                            <a href="https://www.facebook.com/events/951782649401541/" target="_blank">Fanfulla 5/A Circolo Arci - Fred Gnucci dj set</a>
                         </li>
                     </ul>
                 </div>
-                <!-- End of day block -->
                 <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 10</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/1386849108544208/">Fanfulla 5/A Circolo Arci - MISTO MAME Feat. Jazzoux (Fr) + Carrageenan (Belgio) + Dolores (Fr) - Thurston Mourad dj set</a>
+                <div>
+                    <h5>August 30</h5>
+                    <ul>
+                        <li>
+                            <a href="https://www.facebook.com/events/778957290443184/" target="_blank">Fanfulla 5/A Circolo Arci - ABRACADVBRA / Nic dj set</a>
                         </li>
-                        <li class="list-group-item">
-                            <a href="https://ra.co/events/1752197">Hotel Butterfly - Goa Ultrabeat: Cirillo, Giorgio Gigli, Lorenzo Dada</a>
+                        <li>
+                            <a href="https://ra.co/events/1756151" target="_blank">Hotel Butterfly - Electronic Garden: MANZI!, Diana, Guglielmo Bernardini, Matteo Tagliaferri, VDA</a>
                         </li>
                     </ul>
                 </div>
-                <!-- End of day block -->
                 <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 11</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/3431147533820654/">Fanfulla 5/A Circolo Arci - LATAM FUTURO Off [Mala Fama (EC) Live X Condoii (EC/IT) djset \\ Mamacoca Live X La Diferencia ]</a>
+                <div>
+                    <h5>August 31</h5>
+                    <ul>
+                        <li>
+                            <a href="https://ra.co/events/1762426" target="_blank">Hotel Butterfly - GOAULTRABEAT: Rame, Francesco Maria, Marcolino</a>
                         </li>
                     </ul>
                 </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 12</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/570884598492608/">Fanfulla 5/A Circolo Arci - Yosa Peit (Berlin / Fire Records - Live) + Pier Panico dj set</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 13</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://portale.arci.it/preadesione/fanfulla/?fbclid=IwAR2axYH9cHSuKdm9FoNF1Af09f5B3K0az2bpyH19KY50D_Wm3_JzeIoFL84">Fanfulla 5/A Circolo Arci - Kinema Fanfulla - WORK THAT LOVE - “Beau Travail” di Claire Denis (Francia, 1999)</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 14</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/1971971586476125/">Fanfulla 5/A Circolo Arci - Polonius (Fr/Egypt - Live) + Azione Romantica (Sandra Mason + LKSM) dj set</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 15</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/974793360614460/">Fanfulla 5/A Circolo Arci - HOTLINE TNT (Live - USA) + GLM dj set</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 16</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/539206528245995/">Fanfulla 5/A Circolo Arci - SINCE Nel Bosco - Anteprima</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 17</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/288194346891330/">Fanfulla 5/A Circolo Arci - MAKE R/ M AGAIN feat. TAJ KAJAL DWELLERS / YUKIKO MATSUKURA / CIRO FANELLI</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 18</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/957370245407432/">Fanfulla 5/A Circolo Arci - TOAF EXPERIENCE (Live) + Kybbe/Vic Sinex/Bob Corsi dj set</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 19</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/1583543978722470/">Fanfulla 5/A Circolo Arci - "RAVING" di McKenzie Wark | Book Launch | Reading | Dj Set</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 20</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://portale.arci.it/preadesione/fanfulla/?fbclid=IwAR2axYH9cHSuKdm9FoNF1Af09f5B3K0az2bpyH19KY50D_Wm3_JzeIoFL84">Fanfulla 5/A Circolo Arci - Kinema Fanfulla - WORK THAT LOVE -“Ce Vieux Rêve qui Bouge” di Alain Guiraudie (Francia, 2001)</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 21</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/999443191057460/">Fanfulla 5/A Circolo Arci - MAGGIE Closing Party Edition feat. DOCTOR CLEAN (Live) + DISERTA! (Live) + DJ GENIO (dj set)</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 22</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/997892048053602/">Fanfulla 5/A Circolo Arci - NMT (Belgio / From Acte Bonté - Live) + C_C (Francia - Live)</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 23</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/1388189795086842/">Fanfulla 5/A Circolo Arci - SENTUHLA' (Spagna - Live) + Kybbe dj set</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 24</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/786213843040298/">Fanfulla 5/A Circolo Arci - RAMZI (Montreal) & STEVE PEPE (Rome) dj set</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 25</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/275744328322812/">Fanfulla 5/A Circolo Arci - M𝐚t𝐞r𝐢a V𝐢b𝐫a𝐧t𝐞 𝐝i J𝐚n𝐞 𝐁e𝐧n𝐞t𝐭 (†*) / P𝐫e𝐬e𝐧t𝐚z𝐢o𝐧e + D𝐣-𝐒e𝐭</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 26</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/2239604599568146/">Fanfulla 5/A Circolo Arci - Rotten Mosh (Noise Industrial) Live al Fanfulla 5/a</a>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="https://ra.co/events/1752106">Forte Antenne - 𝐌𝐄̀𝐓𝐀𝐑𝐀𝐏𝐇 BpitchBerlin - 𝐅𝐋𝐔𝐈𝐃𝐀 - 𝑁𝑜𝑡 𝐵𝑖𝑛𝑎𝑟𝑦𝑇𝑒𝑐ℎ𝑛𝑜</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 27</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://portale.arci.it/preadesione/fanfulla/?fbclid=IwAR2axYH9cHSuKdm9FoNF1Af09f5B3K0az2bpyH19KY50D_Wm3_JzeIoFL84">Fanfulla 5/A Circolo Arci - Kinema Fanfulla - WORK THAT LOVE - “Born in Flames” di Lizzie Borden (USA, 1983)</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 28</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/969876017535558/">Fanfulla 5/A Circolo Arci - NED ENSEMBLE (Collettivo di improvvisazione) + Perilongu & RoMauro dj set</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 29</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/951782649401541/">Fanfulla 5/A Circolo Arci - Fred Gnucci dj set</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-                <!-- Day block -->
-                <div class="container">
-                    <h5 class="mb-2">August 30</h5>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item">
-                            <a href="https://www.facebook.com/events/778957290443184/">Fanfulla 5/A Circolo Arci - ABRACADVBRA / Nic dj set</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- End of day block -->
-        </div>
-        <!-- Latest compiled and minified JavaScript -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+        </ul>
+    </main>
+
+    <footer>
+        <span>Your new favorite place to follow Rome's clubbing scene!</span>
+    </footer>
     </body>
     </html>
+    

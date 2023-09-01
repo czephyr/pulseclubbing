@@ -11,6 +11,7 @@ CLUBS = { # IDs must be strings to perform the request correctly
     'wood-natural-bar': '216590',
     'cieloterra': '165998',
     'andrea-doria': '32487',
+    'nuur-tor-cervara': '215874'
 }
 
 def scrape(dataframe):
@@ -66,39 +67,42 @@ def scrape(dataframe):
 
         response = requests.post('https://ra.co/graphql', json=json_data, headers=headers)
 
-        # Extracting the events
-        events = response.json()['data']['listing']['data']
+        try:
+            # Extracting the events
+            events = response.json()['data']['listing']['data']
 
-        # Looping through the events to flatten the nested structure
-        for event in events:
-            flat_event = {
-                'id': event['id'],
-                'title': event['title'],
-                'attending': event['attending'],
-                'date': event['date'],
-                'startTime': event['startTime'],
-                'contentUrl': event['contentUrl'],
-                'queueItEnabled': event['queueItEnabled'],
-                'flyerFront': event['flyerFront'],
-                'newEventForm': event['newEventForm'],
-                'venue_id': event['venue']['id'],
-                'venue_name': event['venue']['name'],
-                'venue_contentUrl': event['venue']['contentUrl'],
-                'venue_live': event['venue']['live'],
-                'area_id': event['venue']['area']['id'],
-                'area_name': event['venue']['area']['name'],
-                'country_id': event['venue']['area']['country']['id'],
-                'country_name': event['venue']['area']['country']['name'],
-                'club_name': club_name  # Adding club name for reference
-            }
+            # Looping through the events to flatten the nested structure
+            for event in events:
+                flat_event = {
+                    'id': event['id'],
+                    'title': event['title'],
+                    'attending': event['attending'],
+                    'date': event['date'],
+                    'startTime': event['startTime'],
+                    'contentUrl': event['contentUrl'],
+                    'queueItEnabled': event['queueItEnabled'],
+                    'flyerFront': event['flyerFront'],
+                    'newEventForm': event['newEventForm'],
+                    'venue_id': event['venue']['id'],
+                    'venue_name': event['venue']['name'],
+                    'venue_contentUrl': event['venue']['contentUrl'],
+                    'venue_live': event['venue']['live'],
+                    'area_id': event['venue']['area']['id'],
+                    'area_name': event['venue']['area']['name'],
+                    'country_id': event['venue']['area']['country']['id'],
+                    'country_name': event['venue']['area']['country']['name'],
+                    'club_name': club_name  # Adding club name for reference
+                }
 
-            # Concatenating artist names
-            artist_names = ', '.join([artist['name'] for artist in event['artists']])
-            flat_event['artists'] = artist_names
+                # Concatenating artist names
+                artist_names = ', '.join([artist['name'] for artist in event['artists']])
+                flat_event['artists'] = artist_names
 
-            # Adding the flattened event to the list
-            flattened_events.append(flat_event)
-            time.sleep(2)
+                # Adding the flattened event to the list
+                flattened_events.append(flat_event)
+                time.sleep(2)
+        except:
+            print(f'Error in scraping {club_name} events or no events found')
 
 
     # Creating a DataFrame from the flattened events
@@ -108,4 +112,4 @@ def scrape(dataframe):
     ra_df['contentUrl'] = 'https://ra.co' + ra_df['contentUrl']
     ra_df.rename(columns={'startTime': 'date_and_time','title': 'name', 'venue_name': 'location', 'contentUrl': 'url'}, inplace=True)
     
-    return pd.concat([dataframe,ra_df])
+    return pd.concat([dataframe, ra_df])
