@@ -3,3 +3,8 @@ requests
 bs4
 pandas
 python-dateutil
+python-telegram-bot 
+pytesseract 
+Pillow
+opencv-python-headless
+python-dotenv
