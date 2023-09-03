@@ -87,6 +87,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     On images does OCR and openai call, on links scrapes and openai call.
     Then asks if the produced JSON is correct."""
     if TYPE_OF_CONTENT == "image":
+        #find a way not to save this shit?
         file = await context.bot.get_file(update.message.photo[-1].file_id)
         await file.download_to_drive("./image.jpg")
         extracted_text = pytesseract.image_to_string(Image.open("./image.jpg"))
