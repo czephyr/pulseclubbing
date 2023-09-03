@@ -4,28 +4,21 @@
 
 """
 Simple Bot to reply to Telegram messages.
-
-First, a few handler functions are defined. Then, those functions are passed to
-the Application and registered at their respective places.
-Then, the bot is started and runs until we press Ctrl-C on the command line.
-
-Usage:
-Basic Echobot example, repeats messages.
 Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 
 import logging
-
 import os
 import json
-
 from telegram import __version__ as TG_VER
 from PIL import Image
 import pytesseract
 import cv2
-
 import openai
+import instaloader
+
+# Remove the line below if you are not using Windows
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 try:
@@ -40,7 +33,7 @@ if __version_info__ < (20, 0, 0, "alpha", 1):
         f"visit https://docs.python-telegram-bot.org/en/v{TG_VER}/examples.html"
     )
 from telegram import ForceReply, Update
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, Updater, CallbackContext
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -53,7 +46,7 @@ openai.api_key = OPEN_AI_KEY
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
-# set higher logging level for httpx to avoid all GET and POST requests being logged
+# Set higher logging level for httpx to avoid all GET and POST requests being logged
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
@@ -80,10 +73,11 @@ async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     file = await context.bot.get_file(update.message.photo[-1].file_id)
     await file.download_to_drive('./image.jpg')
     extracted_text = pytesseract.image_to_string(Image.open('./image.jpg'))
+    
+    caption = update.message.caption.lower() if update.message.caption else ''
 
-    caption = update.message.caption.lower()
     if caption == 'instagram' or caption == '':        
-        username, description = extracted_text.split(" ",1)
+        description = extracted_text.split(" ",1)
         result = json.loads(get_event_info(description))
         await update.message.reply_text(result if extracted_text else "Sorry, couldn't extract any text from the image.")
         return
@@ -91,7 +85,19 @@ async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Sorry, I can't understand you. Please send me a photo with the caption 'instagram'")
         return
 
-    
+async def link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    message = update.message.text
+    if 'instagram.com' in message:
+        await update.message.reply_text("Ok, I'll handle this instagram link.")
+        # response = ig_post_handler(update.message.text)
+        # await update.message.reply_text(response.caption)
+        return
+    elif 'facebook' in update.message.text:
+        await update.message.reply_text("Sorry, I can't handle facebook links yet.")
+        return
+    else:
+        await update.message.reply_text("Sorry, I can't understand you. Use the command /help to see what I can do.")
+        return
 
 def get_event_info(description, source='instagram'):
     prompt = f"""
@@ -105,7 +111,8 @@ def get_event_info(description, source='instagram'):
     - artisti: nome degli artisti che suonano separato da una virgola
     - luogo: luogo dell'evento
     - costo: costo del biglietto, se possibile
-    - link: link alla pagina instagram che porta allo username
+    - username: lo username dell'account instagram che ha postato l'evento, di solito dopo gli username di chi ha messo like al post e sempre prima della descrizione dell'evento
+    - link: https://instagram.com/inserisci_username
     """
     response = openai.Completion.create(
         engine="text-davinci-003",
@@ -117,6 +124,11 @@ def get_event_info(description, source='instagram'):
         presence_penalty=0
     )
     return response.choices[0].text.strip()
+
+def ig_post_handler(link):
+    L = instaloader.Instaloader()
+    post = instaloader.Post.from_shortcode(L.context, link.split('/')[-2])
+    return post#.caption
 
 def main() -> None:
     """Start the bot."""
