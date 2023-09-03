@@ -2,13 +2,14 @@ import openai
 
 PROMTP_CONTEXT = """
 È il 2023, il messaggio che segue delimitato dalle virgolette è la caption di un post instagram descrivente un evento.
-Raccogli le seguenti informazioni dalla descrizione e rispondi in formato json con queste variabili:
+Raccogli le seguenti informazioni dalla caption e rispondi in formato json con queste variabili:
 - datetime: la data estratta dalla descriozione in questo formato 2023/mese/giornoTora_di_partenza:minuto_di_partenza:00Z
 - nome_evento: il nome dell'evento estratto dalla descrizione
 - artisti: nome degli artisti che suonano separato da una virgola
 - luogo: luogo dell'evento
 - costo: costo del biglietto, se possibile
 """
+# I think we need to set default values for when stuff isnt found, just adding them to the prompt probably works
 
 def get_event_info(description, openai_key):
     openai.api_key = openai_key
