@@ -24,6 +24,8 @@ from PIL import Image
 import pytesseract
 import cv2
 
+import openai
+
 try:
     from telegram import __version_info__
 except ImportError:
@@ -41,7 +43,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.getenv('TELEGRAM_TOKEN')
+TG_TOKEN = os.getenv('TELEGRAM_TOKEN')
+OPEN_AI_KEY = os.getenv('OPENAI_API_KEY')
+openai.api_key = OPEN_AI_KEY
 
 # Enable logging
 logging.basicConfig(
@@ -73,31 +77,42 @@ async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
     file = await context.bot.get_file(update.message.photo[-1].file_id)
     await file.download_to_drive('./image.jpg')
-    img = cv2.imread('./image.jpg',0)
+    extracted_text = pytesseract.image_to_string(Image.open('./image.jpg'))
 
-    alpha = 1.5 # Contrast control (1.0-3.0)
-    beta = 0 # Brightness control (0-100)
-
-    adjusted = cv2.convertScaleAbs(img, alpha=alpha, beta=beta)
-    cv2.imwrite("./image.jpg",adjusted)
-    extracted_text = pytesseract.image_to_string(adjusted)
-
-    # this sucks
-    # x = extracted_text.split("likes")[1:]
-    # name_descr = x.split("View all")[0]
-    # lista = name_descr.split(" ",1)
-
-    # reply with text    
-    # await update.message.reply_text(extracted_text if extracted_text else "Sorry, couldn't extract any text from the image.")
+    username, description = extracted_text.split(" ",1)
+    result = get_event_info(description)
+    await update.message.reply_text(result if extracted_text else "Sorry, couldn't extract any text from the image.")
     
-    # reply with photo for testing purposes
-    await update.message.reply_photo("./image.jpg")
 
+
+def get_event_info(description):
+    prompt = f"""
+    È il 2023, il seguente messaggio delimitato dalle virgolette è la caption di un post instagram descrivente un evento:
+    '{description}'
+
+    Rispondi dando le seguenti variabili:
+
+    - datetime: la data estratta dalla descriozione in questo formato 2023/mese/giornoTora_di_partenza:minuto_di_partenza:00Z
+    - nome_evento: il nome dell'evento estratto dalla descrizione
+    - artisti: nome degli artisti che suonano separato da una virgola
+    - luogo: luogo dell'evento
+    - costo: costo del biglietto, se possibile
+    """
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        temperature=0,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+    return response.choices[0].text.strip()
 
 def main() -> None:
     """Start the bot."""
     # Create the Application and pass it your bot's token.
-    application = Application.builder().token(TOKEN).build()
+    application = Application.builder().token(TG_TOKEN).build()
 
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
@@ -107,6 +122,7 @@ def main() -> None:
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)
+
 
 
 if __name__ == "__main__":
