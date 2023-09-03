@@ -1,4 +1,8 @@
 - deployment is currently pulling in a folder in the home, then copying the files to the other folder, sucks
-- add telegram interface to add manually events
-- esthetic!
+- Telegram
+    - add interface to manually add events
+    - add telegram interface to accept or edit json
+    - add link handler for instagram
+    - add link handler for facebook
 - integrate streaming platforms links or embeds (see fanfulla artists_links field)
+- create db of club name along with ig handles

@@ -26,6 +26,7 @@ import pytesseract
 import cv2
 
 import openai
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 try:
     from telegram import __version_info__
@@ -75,28 +76,36 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 
 async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the user message."""
+
     file = await context.bot.get_file(update.message.photo[-1].file_id)
     await file.download_to_drive('./image.jpg')
     extracted_text = pytesseract.image_to_string(Image.open('./image.jpg'))
 
-    username, description = extracted_text.split(" ",1)
-    result = json.loads(get_event_info(description))
-    await update.message.reply_text(result if extracted_text else "Sorry, couldn't extract any text from the image.")
+    caption = update.message.caption.lower()
+    if caption == 'instagram' or caption == '':        
+        username, description = extracted_text.split(" ",1)
+        result = json.loads(get_event_info(description))
+        await update.message.reply_text(result if extracted_text else "Sorry, couldn't extract any text from the image.")
+        return
+    else:
+        await update.message.reply_text("Sorry, I can't understand you. Please send me a photo with the caption 'instagram'")
+        return
+
     
 
-def get_event_info(description):
+def get_event_info(description, source='instagram'):
     prompt = f"""
-    È il 2023, il seguente messaggio delimitato dalle virgolette è la caption di un post instagram descrivente un evento:
+    È il 2023, il seguente messaggio delimitato dalle virgolette è l'estrazione OCR di uno screenshot da cellulare di un post instagram descrivente un evento:
     '{description}'
 
-    Rispondi dando le seguenti variabili in formato json:
+    Rispondi dando le seguenti variabili in formato json, traendo informazioni solo dalla descrizione del post:
 
-    - datetime: la data estratta dalla descriozione in questo formato 2023/mese/giornoTora_di_partenza:minuto_di_partenza:00Z
+    - datetime: la data estratta dalla descriozione in questo formato 2023-mese-giorno ora_di_partenza:minuto_di_partenza:00
     - nome_evento: il nome dell'evento estratto dalla descrizione
     - artisti: nome degli artisti che suonano separato da una virgola
     - luogo: luogo dell'evento
     - costo: costo del biglietto, se possibile
+    - link: link alla pagina instagram che porta allo username
     """
     response = openai.Completion.create(
         engine="text-davinci-003",
