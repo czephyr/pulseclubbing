@@ -18,6 +18,7 @@ bot.
 import logging
 
 import os
+import json
 
 from telegram import __version__ as TG_VER
 from PIL import Image
@@ -80,17 +81,16 @@ async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     extracted_text = pytesseract.image_to_string(Image.open('./image.jpg'))
 
     username, description = extracted_text.split(" ",1)
-    result = get_event_info(description)
+    result = json.loads(get_event_info(description))
     await update.message.reply_text(result if extracted_text else "Sorry, couldn't extract any text from the image.")
     
-
 
 def get_event_info(description):
     prompt = f"""
     È il 2023, il seguente messaggio delimitato dalle virgolette è la caption di un post instagram descrivente un evento:
     '{description}'
 
-    Rispondi dando le seguenti variabili:
+    Rispondi dando le seguenti variabili in formato json:
 
     - datetime: la data estratta dalla descriozione in questo formato 2023/mese/giornoTora_di_partenza:minuto_di_partenza:00Z
     - nome_evento: il nome dell'evento estratto dalla descrizione
