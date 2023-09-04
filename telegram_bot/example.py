@@ -69,7 +69,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 
 async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-
+    
     file = await context.bot.get_file(update.message.photo[-1].file_id)
     await file.download_to_drive('./image.jpg')
     extracted_text = pytesseract.image_to_string(Image.open('./image.jpg'))
@@ -86,11 +86,11 @@ async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
 async def link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    message = update.message.text
-    if 'instagram.com' in message:
-        await update.message.reply_text("Ok, I'll handle this instagram link.")
-        # response = ig_post_handler(update.message.text)
-        # await update.message.reply_text(response.caption)
+    text = update.message.text
+    if 'instagram.com' in text:
+        description, username = ig_post_handler(text)
+        result = json.loads(get_event_info(description, username))
+        await update.message.reply_text(result if description else "Sorry, couldn't extract any caption from the post.")
         return
     elif 'facebook' in update.message.text:
         await update.message.reply_text("Sorry, I can't handle facebook links yet.")
@@ -99,7 +99,7 @@ async def link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Sorry, I can't understand you. Use the command /help to see what I can do.")
         return
 
-def get_event_info(description, source='instagram'):
+def get_event_info(description, username='', source='instagram'):
     prompt = f"""
     È il 2023, il seguente messaggio delimitato dalle virgolette è l'estrazione OCR di uno screenshot da cellulare di un post instagram descrivente un evento:
     '{description}'
@@ -112,7 +112,7 @@ def get_event_info(description, source='instagram'):
     - luogo: luogo dell'evento
     - costo: costo del biglietto, se possibile
     - username: lo username dell'account instagram che ha postato l'evento, di solito dopo gli username di chi ha messo like al post e sempre prima della descrizione dell'evento
-    - link: https://instagram.com/inserisci_username
+    - link: https://instagram.com/{username if username else 'inserisci lo username del profilo instagram che ha postato evento'}
     """
     response = openai.Completion.create(
         engine="text-davinci-003",
@@ -128,7 +128,7 @@ def get_event_info(description, source='instagram'):
 def ig_post_handler(link):
     L = instaloader.Instaloader()
     post = instaloader.Post.from_shortcode(L.context, link.split('/')[-2])
-    return post#.caption
+    return post.caption, post.owner_username
 
 def main() -> None:
     """Start the bot."""
@@ -138,8 +138,11 @@ def main() -> None:
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
 
-    # on non command i.e message - echo the message on Telegram
+    # When the user sends a message, check if it contains a photo
     application.add_handler(MessageHandler(filters.PHOTO, photo))
+
+    # When the user sends a message, check if it contains a link
+    application.add_handler(MessageHandler(filters.TEXT, link))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)

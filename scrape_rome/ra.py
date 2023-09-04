@@ -3,6 +3,7 @@ import pandas as pd
 import time
 from datetime import date
 from dateutil.relativedelta import relativedelta
+from utils import clean_text
 
 
 CLUBS = { # IDs must be strings to perform the request correctly
@@ -75,7 +76,7 @@ def scrape(dataframe):
             for event in events:
                 flat_event = {
                     'id': event['id'],
-                    'title': event['title'],
+                    'title': clean_text(event['title'], source='scraper'),
                     'attending': event['attending'],
                     'date': event['date'],
                     'startTime': event['startTime'],

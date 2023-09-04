@@ -1,21 +1,32 @@
 import openai
 
-PROMTP_CONTEXT = """
-È il 2023, il messaggio che segue delimitato dalle virgolette è la caption di un post instagram descrivente un evento.
+PROMPT_CONTEXT = """
+È il 2023, il messaggio che segue delimitato dalle virgolette è la caption di un post descrivente un evento.
 Raccogli le seguenti informazioni dalla caption e rispondi in formato json con queste variabili:
-- datetime: la data estratta dalla descriozione in questo formato 2023/mese/giornoTora_di_partenza:minuto_di_partenza:00Z
+- datetime: la data estratta dalla descrizione in questo formato 2023/mese/giornoTora_di_partenza:minuto_di_partenza:00Z
 - nome_evento: il nome dell'evento estratto dalla descrizione
 - artisti: nome degli artisti che suonano separato da una virgola
 - luogo: luogo dell'evento
 - costo: costo del biglietto, se possibile
+
 """
 # I think we need to set default values for when stuff isnt found, just adding them to the prompt probably works
 
-def get_event_info(description, openai_key):
-    openai.api_key = openai_key
+def create_prompt(description, username='', link='', source=''):
+    prompt = f"""
+    {PROMPT_CONTEXT}
+    """
+    + '- username: ' + 'lo username dell\'account instagram che ha postato l\'evento, di solito dopo gli username di chi ha messo like al post e sempre prima della descrizione dell\'evento \n' if source == 'image' else username
+    + '\n'
+    + '- link: ' + 'https://instagram.com/[inserisci qui lo username del profilo instagram che ha postato evento] \n' if source == 'image' else link
+    + '\n'
+    + f"Caption: '{description}'"    
+    return prompt
 
-    prompt = PROMTP_CONTEXT + f'"{description}"'
 
+def get_event_info(description, source, key, username='', link=''):
+    openai.api_key = key
+    prompt = create_prompt(description, username=username, link=link, source=source)
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=prompt,
