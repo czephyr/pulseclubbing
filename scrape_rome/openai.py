@@ -8,19 +8,22 @@ Raccogli le seguenti informazioni dalla caption e rispondi in formato json con q
 - artisti: nome degli artisti che suonano separato da una virgola
 - luogo: luogo dell'evento
 - costo: costo del biglietto, se possibile
-
 """
-# I think we need to set default values for when stuff isnt found, just adding them to the prompt probably works
 
+INSTAGRAM_IMAGE_ADDONS = """
+- username: lo username dell'account instagram che ha postato l'evento, di solito dopo gli username di chi ha messo like al post e sempre prima della descrizione dell'evento
+- link: https://instagram.com/[inserisci qui lo username del profilo instagram che ha postato evento]
+"""
+
+# I think we need to set default values for when stuff isnt found, just adding them to the prompt probably works
 def create_prompt(description, username='', link='', source=''):
-    prompt = f"""
-    {PROMPT_CONTEXT}
-    """
-    + '- username: ' + 'lo username dell\'account instagram che ha postato l\'evento, di solito dopo gli username di chi ha messo like al post e sempre prima della descrizione dell\'evento \n' if source == 'image' else username
-    + '\n'
-    + '- link: ' + 'https://instagram.com/[inserisci qui lo username del profilo instagram che ha postato evento] \n' if source == 'image' else link
-    + '\n'
-    + f"Caption: '{description}'"    
+    prompt = ''
+    if username != '' and link != '':
+        prompt = PROMPT_CONTEXT + f"- username: {username}\n" + f"- link: {link}\n"
+    else:
+        prompt = PROMPT_CONTEXT
+    prompt = prompt + f"Caption: '{description}'"    
+    
     return prompt
 
 

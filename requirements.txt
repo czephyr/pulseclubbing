@@ -9,3 +9,4 @@ Pillow
 opencv-python-headless
 python-dotenv
 openai
+instaloader
