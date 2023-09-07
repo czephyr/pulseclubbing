@@ -4,6 +4,7 @@
 import logging
 import os
 import json
+import sqlite3
 
 from PIL import Image
 import pytesseract
@@ -26,6 +27,7 @@ from telegram.ext import (
 from dotenv import load_dotenv
 
 from scrape_rome.openai import get_event_info
+from scrape_rome import db_handling
 from scrape_rome.ig import post_handler
 
 
@@ -38,11 +40,6 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
-
-
-NEW, CONTENT, ANSWER, INCORRECT = range(4)
-
-TYPE_OF_CONTENT = ""
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -68,7 +65,7 @@ async def new(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ),
     )
 
-    return NEW
+    return SELECTED_CONTENT
 
 
 async def sendme(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -79,7 +76,8 @@ async def sendme(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Send me the link")
     elif "screen" in text.lower():
         await update.message.reply_text("Send me the screenshot")
-    return CONTENT
+    return ASKED_FOR_CONTENT
+
 
 
 async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -94,22 +92,42 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         extracted_text = pytesseract.image_to_string(Image.open("./image.jpg"))
         username, description = extracted_text.split(" ", 1)
         response = json.loads(get_event_info(description, source='instagram', key=OPEN_AI_KEY))
+        context.user_data['event'] = response
     elif "link" in context.user_data['type_of_content']:
         text = update.message.text
         if 'instagram.com' in text:
+            logger.info('wooo')
             description, username = post_handler(text)
             result = json.loads(get_event_info(description, source='instagram', key=OPEN_AI_KEY, username=username, link=text))
             response = result if description else "Sorry, couldn't extract any caption from the post."
-        elif 'facebook.com' in text:
-            response = "Sorry, I can't handle facebook links yet."
-        else:
-            response = "Sorry, I can't understand you. Use the command /help to see what I can do."   
-    else:
-        response = f'Couldn\'t parse your message.\nThis is your last recorded message: {update.message.text}.\nThis is the type of content you selected: {TYPE_OF_CONTENT}'
-    await update.message.reply_text(f"```\n {response} \n```", parse_mode="Markdown")
-    # await update.message.reply_text(TYPE_OF_CONTENT if TYPE_OF_CONTENT else f'THIS IS THE DEFAULT RESPONSE {response + update.message.text}')
+            context.user_data['event'] = response
+            logger.info('wooo2')
+            return CREATED_EVENT
+    #     elif 'facebook.com' in text:
+    #         response = "Sorry, I can't handle facebook links yet."
+    #     else:
+    #         response = "Sorry, I can't understand you. Use the command /help to see what I can do."   
+    # else:
+    #     response = f'Couldn\'t parse your message.\nThis is your last recorded message: {update.message.text}.\nThis is the type of content you selected: {TYPE_OF_CONTENT}'
+    # #await update.message.reply_text(f"```\n {response} \n```", parse_mode="Markdown")
+    # # await update.message.reply_text(TYPE_OF_CONTENT if TYPE_OF_CONTENT else f'THIS IS THE DEFAULT RESPONSE {response + update.message.text}')
     
+    # return CREATED_EVENT
+
+async def ask(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    logger.info('wooo3')
     # need to insert the json in context.user_data so that next handler can access json
+    response = context.user_data['event']
+    msg = f"""
+        *Name:* {response["name"]}
+        *Date:* {response["date"]}\n
+        *Artists:* {response["artists"]}\n
+        *Organizer:* {response["organizer"]}\n
+        *Location:* {response["location"]}\n
+        *Price:* {response["price"]}\n
+        *Link:* {response["link"]}
+    """
+    await update.message.reply_text(msg, parse_mode="Markdown")
     keyboard = InlineKeyboardMarkup(
         [
             [
@@ -120,10 +138,10 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
     await update.message.reply_text("is this correct?", reply_markup=keyboard)
 
-    return ANSWER
+    return ASKED_IF_CORRECT
 
 
-async def correctness(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """If the user pressed the Yes button, the JSON is deemed correct and we save it to database 
     and close the conversation.
     If the user pressed the No button then prompts the user for a correct version of the JSON"""
@@ -132,21 +150,41 @@ async def correctness(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     logger.info(query.data)
     if query.data == "yes":
         await query.edit_message_text("Ok adding to database!")
-        # add to database here
-        # needs to search context.user_data to have access to JSON from previous handler
+        response = context.user_data['event']
+        event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"])
+        with sqlite3.connect('pulse.db') as connection:
+            # care, event dates have to be strings
+            db_handling.insert_event(connection, event)
         return ConversationHandler.END
     else:
-        await query.edit_message_text("That sucks, please send a correct version")
-        return INCORRECT
+        reply_keyboard = [
+        ["Name", "Date", "Artists", "Organizer","Location","Price","Link"]]
 
+        await update.message.reply_text(
+            "What do you want to correct?",
+            reply_markup=ReplyKeyboardMarkup(
+                reply_keyboard,
+                one_time_keyboard=True,
+                input_field_placeholder="Select data to correct:",
+            ),
+        )
 
-async def insert(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Executes after the user has sent a corrected JSON, saves the JSON to db."""
-    text = update.message.text
-    # insert to db
-    await update.message.reply_text("added to database!")
-    return ConversationHandler.END
+        return SELECTED_PARAMETER_TO_CORRECT
+    
 
+async def ask_correction(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Saves kind of content that the user has selected and propts for the content"""
+    context.user_data['to_correct'] = update.message.text
+    await update.message.reply_text("Send me your correction:")
+    return ASKED_FOR_CORRECTION
+
+async def correct(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Saves kind of content that the user has selected and propts for the content"""
+    parameter_to_correct = context.user_data['to_correct']
+    context.user_data['event'][parameter_to_correct] = update.message.text
+    return CREATED_EVENT
+
+SELECTED_CONTENT, ASKED_FOR_CONTENT, CREATED_EVENT, ASKED_IF_CORRECT, SELECTED_PARAMETER_TO_CORRECT, ASKED_FOR_CORRECTION = range(6)
 
 if __name__ == "__main__":
     application = ApplicationBuilder().token(TG_TOKEN).build()
@@ -154,7 +192,7 @@ if __name__ == "__main__":
     conversation_handler = ConversationHandler(
         entry_points=[CommandHandler("new", new)],
         states={
-            NEW: [
+            SELECTED_CONTENT: [
                 MessageHandler(
                     filters.Regex(
                         "^(IG LINK|FB LINK|IG SCREEN|FB SCREEN)$"
@@ -162,9 +200,13 @@ if __name__ == "__main__":
                     sendme,
                 )
             ],
-            CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO, answer)],
-            ANSWER: [CallbackQueryHandler(correctness)],
-            INCORRECT: [MessageHandler(filters.TEXT, insert)],
+            ASKED_FOR_CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO, answer)],
+            CREATED_EVENT: [CallbackQueryHandler(ask)],
+            ASKED_IF_CORRECT: [MessageHandler(filters.Regex(
+                        "^(NAME|DATE|ARTISTS|ORGANIZER|LOCATION|PRICE|LINK)$"
+                    ), save_or_correct)],
+            SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.TEXT, ask_correction)],
+            ASKED_FOR_CORRECTION: [MessageHandler(filters.TEXT, correct)],
         },
         fallbacks=[],
     )
