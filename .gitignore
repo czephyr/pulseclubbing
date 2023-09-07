@@ -1,6 +1,9 @@
 .venv
 .vagrant
 __pycache__
-/data
-/dev/ig_test/**/
+data/
+dev/
 .env
+telegram_bot
+image.jpg
+pulse.db
