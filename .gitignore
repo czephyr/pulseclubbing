@@ -2,6 +2,7 @@
 .vagrant
 __pycache__
 data/
+dev/
 .env
 telegram_bot
 image.jpg
