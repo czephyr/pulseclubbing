@@ -100,7 +100,6 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             description, username = post_handler(text)
             result = json.loads(get_event_info(description, source='instagram', key=OPEN_AI_KEY, username=username, link=text))
             response = result if description else "Sorry, couldn't extract any caption from the post."
-            logger.info('dio cane?')
         elif 'facebook.com' in text:
             response = "Sorry, I can't handle facebook links yet."
         else:

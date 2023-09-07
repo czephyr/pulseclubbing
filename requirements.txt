@@ -10,3 +10,5 @@ opencv-python-headless
 python-dotenv
 openai
 instaloader
+fuzzywuzzy
+python-Levenshtein

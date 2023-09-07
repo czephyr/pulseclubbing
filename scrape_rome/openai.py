@@ -19,6 +19,7 @@ INSTAGRAM_IMAGE_ADDONS = """
 def create_prompt(description, username='', link='', source=''):
     prompt = ''
     if username != '' and link != '':
+        # this means its an instagram link, so we already have those
         prompt = PROMPT_CONTEXT + f"- username: {username}\n" + f"- link: {link}\n"
     else:
         prompt = PROMPT_CONTEXT
