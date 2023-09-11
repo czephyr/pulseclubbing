@@ -1,4 +1,11 @@
 from fuzzywuzzy.fuzz import token_sort_ratio
+from datetime import datetime
+
+def delete_row_by_id(conn, id):
+    """Delete row by id"""
+    cur = conn.cursor()
+    cur.execute("DELETE FROM events WHERE id=?", (id,))
+    conn.commit()
 
 def init_db(conn):
     """initializes new db new db"""
@@ -13,8 +20,11 @@ def insert_event_if_no_similar(conn, event):
     cur = conn.cursor()
 
     name,date,_,organizer,_,_,_ = event
-    # date = date.strftime("%Y/%M/%D, %H:%M:%S") not needed?
-
+    try:
+        datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
+    except ValueError:
+        print(f"Error parsing date {date} for event {name} by {organizer}")
+        return None
     day_events_query = "SELECT name, organizer FROM events WHERE date=?"
     cur.execute(day_events_query,(date,))
     rows = cur.fetchall()
@@ -50,8 +60,7 @@ def is_igpost_shortcode_in_db(conn, shortcode):
 def return_events_by_month(conn, date):
     """Insert new event in db if no similar ones by organizer and name are found in the same date"""
     cur = conn.cursor()
-
-    day_events_query = "SELECT * FROM events WHERE date LIKE '?-?-%'"
-    cur.execute(day_events_query,(date.strftime('%Y'),date.strftime('%M')))
+    day_events_query = "SELECT * FROM events WHERE date LIKE ? || '-' || ? || '-%'"
+    cur.execute(day_events_query, (date.strftime('%Y'), date.strftime('%m')))
     return cur.fetchall()
 

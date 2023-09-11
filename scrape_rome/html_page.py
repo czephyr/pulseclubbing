@@ -11,7 +11,8 @@ def update_webpage(db_connection, file_to_write:str):
     events_by_day = defaultdict(list)
     for event in events_in_db:
         # Parse the date string and extract only the date part
-        date = datetime.strptime(event[1], '%Y-%m-%d %H:%M:%S').date()
+        print(event)
+        date = datetime.strptime(event[2], '%Y-%m-%d %H:%M:%S').date()
         # Add the event to the list of events for that date
         events_by_day[str(date)].append(event)
 
@@ -27,11 +28,11 @@ def update_webpage(db_connection, file_to_write:str):
                     <ul>'''
 
             # Add each link as a list item
-            for event in sorted(events,key=lambda x: datetime.strptime(x[1], '%Y-%m-%d %H:%M:%S')):
-                name,date,artists,organizer,location,price,link = event
+            for event in sorted(events,key=lambda x: datetime.strptime(x[2], '%Y-%m-%d %H:%M:%S')):
+                id,name,date,artists,organizer,location,price,link = event
                 html_content += f'''
                         <li>
-                            <a href="{link}" target="_blank">{location} - {name}</a>
+                            <a href="{link}" target="_blank" db_id={id}>{organizer} - {name}</a>
                         </li>'''
 
             html_content += '''
