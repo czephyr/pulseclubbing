@@ -1,6 +1,3 @@
-#TODO: implement user specific data that gets passed through the handlers (JSON of the event sent by the user)
-# https://stackoverflow.com/questions/61053602/python-telegram-bot-pass-argument-between-conversation-handlers
-
 import logging
 import os
 import json
@@ -50,6 +47,97 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text="PulseRome started. Type /new to add an event",
     )
 
+#TODO: maybe fix this shit code
+async def manual_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Asks about the kind of content youre sending"""
+    logger.info('wooo')
+    context.user_data['event'] = {}
+    msg ="""
+This is the structure of the event data
+
+*Name:* 
+*Date:*
+*Artists:*
+*Organizer:*
+*Location:*
+*Price:*
+*Link:*
+
+Start by sending me the name of the event
+    """
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+    return MANUAL_START
+
+async def manual_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Saves kind of content that the user has selected and propts for the content"""
+    text = update.message.text
+    context.user_data['event']['name'] = text
+    await update.message.reply_text("Send me the date in format YYYY-MM-DD HH:MM:SS")
+    return MANUAL_NAME
+
+async def manual_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Saves kind of content that the user has selected and propts for the content"""
+    text = update.message.text
+    context.user_data['event']['date'] = text
+    await update.message.reply_text("Send me the artists separated by a comma")
+    return MANUAL_DATE
+
+async def manual_artists(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Saves kind of content that the user has selected and propts for the content"""
+    text = update.message.text
+    context.user_data['event']['artists'] = text
+    await update.message.reply_text("Send me the organizer")
+    return MANUAL_ARTISTS
+
+async def manual_organizer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Saves kind of content that the user has selected and propts for the content"""
+    text = update.message.text
+    context.user_data['event']['organizer'] = text
+    await update.message.reply_text("Send me the Location")
+    return MANUAL_ORGANIZER
+
+async def manual_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Saves kind of content that the user has selected and propts for the content"""
+    text = update.message.text
+    context.user_data['event']['location'] = text
+    await update.message.reply_text("Send me the price, if its free send 0, if its unknown send -1")
+    return MANUAL_PRICE
+
+async def manual_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Saves kind of content that the user has selected and propts for the content"""
+    text = update.message.text
+    context.user_data['event']['price'] = text
+    await update.message.reply_text("Send me the link to the event")
+    return MANUAL_LINK
+
+async def manual_end(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Saves kind of content that the user has selected and propts for the content"""
+    text = update.message.text
+    context.user_data['event']['link'] = text
+
+
+    response = context.user_data['event']
+    msg = f"""
+*Name:* {response["name"]}
+*Date:* {response["date"]}
+*Artists:* {response["artists"]}
+*Organizer:* {response["organizer"]}
+*Location:* {response["location"]}
+*Price:* {response["price"]}
+*Link:* {response["link"]}
+    """
+    await update.message.reply_text(msg, parse_mode="Markdown")
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("Yes", callback_data="yes"),
+                InlineKeyboardButton("No", callback_data="no"),
+            ]
+        ]
+    )
+    await update.message.reply_text("is this correct?", reply_markup=keyboard)
+    return CREATED_EVENT
 
 async def new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Asks about the kind of content youre sending"""
@@ -97,7 +185,6 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     elif "link" in context.user_data['type_of_content']:
         text = update.message.text
         if 'instagram.com' in text:
-            logger.info('wooo')
             description, username = return_username_caption(text)
             result = json.loads(get_event_info(description, source='instagram', key=OPEN_AI_KEY, username=username, link=text))
             response = result if description else "Sorry, couldn't extract any caption from the post."
@@ -182,13 +269,13 @@ async def correct(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     response = context.user_data['event']
     msg = f"""
-    *Name:* {response["name"]}
-    *Date:* {response["date"]}
-    *Artists:* {response["artists"]}
-    *Organizer:* {response["organizer"]}
-    *Location:* {response["location"]}
-    *Price:* {response["price"]}
-    *Link:* {response["link"]}
+*Name:* {response["name"]}
+*Date:* {response["date"]}
+*Artists:* {response["artists"]}
+*Organizer:* {response["organizer"]}
+*Location:* {response["location"]}
+*Price:* {response["price"]}
+*Link:* {response["link"]}
     """
     await update.message.reply_text(msg, parse_mode="Markdown")
     keyboard = InlineKeyboardMarkup(
@@ -203,21 +290,16 @@ async def correct(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return CREATED_EVENT
 
 SELECTED_CONTENT, ASKED_FOR_CONTENT, CREATED_EVENT, ASKED_IF_CORRECT, SELECTED_PARAMETER_TO_CORRECT, ASKED_FOR_CORRECTION = range(6)
+MANUAL_START,MANUAL_NAME,MANUAL_DATE,MANUAL_ARTISTS,MANUAL_ORGANIZER,MANUAL_PRICE,MANUAL_LINK = range(6, 13)
 
 if __name__ == "__main__":
     application = ApplicationBuilder().token(TG_TOKEN).build()
 
-    conversation_handler = ConversationHandler(
+    new_conversation_handler = ConversationHandler(
         entry_points=[CommandHandler("new", new)],
         states={
             SELECTED_CONTENT: [
-                MessageHandler(
-                    filters.Regex(
-                        "^(IG LINK|FB LINK|IG SCREEN|FB SCREEN)$"
-                    ),
-                    sendme,
-                )
-            ],
+                MessageHandler(filters.Regex("^(IG LINK|FB LINK|IG SCREEN|FB SCREEN)$"), sendme)],
             ASKED_FOR_CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO, answer)],
             CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
             SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
@@ -227,8 +309,27 @@ if __name__ == "__main__":
         fallbacks=[],
     )
 
+    manual_conversation_handler = ConversationHandler(
+        entry_points=[CommandHandler("manual", manual_start)],
+        states={
+            MANUAL_START: [MessageHandler(filters.TEXT, manual_name)],
+            MANUAL_NAME: [MessageHandler(filters.TEXT, manual_date)],
+            MANUAL_DATE: [MessageHandler(filters.TEXT, manual_artists)],
+            MANUAL_ARTISTS: [MessageHandler(filters.TEXT, manual_organizer)],
+            MANUAL_ORGANIZER: [MessageHandler(filters.TEXT, manual_price)],
+            MANUAL_PRICE: [MessageHandler(filters.TEXT, manual_link)],
+            MANUAL_LINK: [MessageHandler(filters.TEXT, manual_end)],
+            CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
+            SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
+                        "^(NAME|DATE|ARTISTS|ORGANIZER|LOCATION|PRICE|LINK)$"), ask_correction)],
+            ASKED_FOR_CORRECTION: [MessageHandler(filters.TEXT, correct)]
+        },
+        fallbacks=[],
+    )
+
     start_handler = CommandHandler("start", start)
     application.add_handler(start_handler)
-    application.add_handler(conversation_handler)
+    application.add_handler(new_conversation_handler)
+    application.add_handler(manual_conversation_handler)
 
     application.run_polling()

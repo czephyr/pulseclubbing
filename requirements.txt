@@ -12,3 +12,4 @@ openai
 instaloader
 fuzzywuzzy
 python-Levenshtein
+ftfy

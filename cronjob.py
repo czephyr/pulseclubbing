@@ -1,4 +1,3 @@
-import pandas as pd
 from scrape_rome import html_page, ig
 import sqlite3
 
