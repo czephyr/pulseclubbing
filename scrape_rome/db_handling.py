@@ -7,8 +7,9 @@ def init_db(conn):
     cursor.execute('''CREATE TABLE ig_posts (id INTEGER PRIMARY KEY, shortcode TEXT)''')
     conn.commit()
 
-def insert_event(conn, event):
-    """Insert new event in db if no similar ones by organizer and name are found in the same date"""
+def insert_event_if_no_similar(conn, event):
+    """Insert new event in db if no similar ones by organizer and name are found in the same date
+       Returns None if successful"""
     cur = conn.cursor()
 
     name,date,_,organizer,_,_,_ = event
@@ -38,16 +39,13 @@ def insert_event(conn, event):
     conn.commit()
     return None
 
-def check_ig_shortcode(conn, shortcode):
-    """Return false when the same shortcode is already in the db"""
+def is_igpost_shortcode_in_db(conn, shortcode):
+    """Return True when the passed shortcode is already in the db"""
     cur = conn.cursor()
     shortcode_query = "SELECT * FROM ig_posts WHERE shortcode=?"
     cur.execute(shortcode_query,(shortcode,))
     rows = cur.fetchall()
-    if len(rows) > 0:
-        return False
-    else:
-        return True
+    return len(rows) > 0
 
 def return_events_by_month(conn, date):
     """Insert new event in db if no similar ones by organizer and name are found in the same date"""

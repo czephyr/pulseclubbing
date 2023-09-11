@@ -29,7 +29,7 @@ from dotenv import load_dotenv
 
 from scrape_rome.openai import get_event_info
 from scrape_rome import db_handling
-from scrape_rome.ig import post_handler
+from scrape_rome.ig import return_username_caption
 
 
 load_dotenv()
@@ -98,7 +98,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         text = update.message.text
         if 'instagram.com' in text:
             logger.info('wooo')
-            description, username = post_handler(text)
+            description, username = return_username_caption(text)
             result = json.loads(get_event_info(description, source='instagram', key=OPEN_AI_KEY, username=username, link=text))
             response = result if description else "Sorry, couldn't extract any caption from the post."
             context.user_data['event'] = response
@@ -111,13 +111,13 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
     response = context.user_data['event']
     msg = f"""
-    *Name:* {response["name"]}
-    *Date:* {response["date"]}
-    *Artists:* {response["artists"]}
-    *Organizer:* {response["organizer"]}
-    *Location:* {response["location"]}
-    *Price:* {response["price"]}
-    *Link:* {response["link"]}
+*Name:* {response["name"]}
+*Date:* {response["date"]}
+*Artists:* {response["artists"]}
+*Organizer:* {response["organizer"]}
+*Location:* {response["location"]}
+*Price:* {response["price"]}
+*Link:* {response["link"]}
     """
     await update.message.reply_text(msg, parse_mode="Markdown")
     keyboard = InlineKeyboardMarkup(
@@ -143,7 +143,7 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"])
         with sqlite3.connect('pulse.db') as connection:
             # care, event dates have to be strings
-            duplicated = db_handling.insert_event(connection, event)
+            duplicated = db_handling.insert_event_if_no_similar(connection, event)
             if duplicated:
                 await query.edit_message_text(f"This event is too similar to {duplicated[0]} by {duplicated[1]} happening on same date, won't be added.")
             else:
