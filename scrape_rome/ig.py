@@ -47,7 +47,7 @@ def scrape_and_insert(users: list):
                         except(json.decoder.JSONDecodeError):
                             print(f'Error decoding json for post instagram.com/{shortcode}')
                             continue
-                        event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"])
+                        event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"],caption)
                         duplicated = db_handling.insert_event_if_no_similar(connection, event)
                         if duplicated:
                             print(f"The event {event[0]} is too similar to {duplicated[0]} by {duplicated[1]} happening on same date, won't be added.")

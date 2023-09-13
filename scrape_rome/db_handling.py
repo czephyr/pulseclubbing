@@ -1,17 +1,17 @@
 from fuzzywuzzy.fuzz import token_sort_ratio
 from datetime import datetime
 
+def init_db(conn):
+    """initializes new db new db"""
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE events (id INTEGER PRIMARY KEY, name TEXT, date TEXT, artists TEXT, organizer TEXT, location TEXT, price REAL, link TEXT, raw_descr TEXT)''')
+    cursor.execute('''CREATE TABLE ig_posts (id INTEGER PRIMARY KEY, shortcode TEXT)''')
+    conn.commit()
+
 def delete_row_by_id(conn, id):
     """Delete row by id"""
     cur = conn.cursor()
     cur.execute("DELETE FROM events WHERE id=?", (id,))
-    conn.commit()
-
-def init_db(conn):
-    """initializes new db new db"""
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE events (id INTEGER PRIMARY KEY, name TEXT, date TEXT, artists TEXT, organizer TEXT, location TEXT, price REAL, link TEXT)''')
-    cursor.execute('''CREATE TABLE ig_posts (id INTEGER PRIMARY KEY, shortcode TEXT)''')
     conn.commit()
 
 def insert_event_if_no_similar(conn, event):
@@ -44,7 +44,7 @@ def insert_event_if_no_similar(conn, event):
             # on the same day
             return (db_event_name,db_event_organizer)
 
-    insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link) VALUES(?,?,?,?,?,?,?)"
+    insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link,raw_descr) VALUES(?,?,?,?,?,?,?,?)"
     cur.execute(insert_query, event)
     conn.commit()
     return None

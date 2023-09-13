@@ -112,10 +112,17 @@ async def manual_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Send me the link to the event")
     return MANUAL_LINK
 
-async def manual_end(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def manual_rawdescr(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Saves kind of content that the user has selected and propts for the content"""
     text = update.message.text
     context.user_data['event']['link'] = text
+    await update.message.reply_text("Send me the raw description of the event")
+    return MANUAL_DESCR
+
+async def manual_end(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Saves kind of content that the user has selected and propts for the content"""
+    text = update.message.text
+    context.user_data['event']['raw_descr'] = text
 
 
     response = context.user_data['event']
@@ -127,6 +134,7 @@ async def manual_end(update: Update, context: ContextTypes.DEFAULT_TYPE):
 *Location:* {response["location"]}
 *Price:* {response["price"]}
 *Link:* {response["link"]}
+*Raw_descr:* {response["raw_descr"]}
     """
     await update.message.reply_text(msg, parse_mode="Markdown")
     keyboard = InlineKeyboardMarkup(
@@ -189,7 +197,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         if 'instagram.com' in text:
             description, username = return_username_caption(text)
             result = json.loads(get_event_info(description, source='instagram', key=OPEN_AI_KEY, username=username, link=text))
-            response = result if description else "Sorry, couldn't extract any caption from the post."
+            result["raw_descr"] = description
             context.user_data['event'] = response
         elif 'facebook.com' in text:
             response = "Sorry, I can't handle facebook links yet."
@@ -207,6 +215,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 *Location:* {response["location"]}
 *Price:* {response["price"]}
 *Link:* {response["link"]}
+*Raw_descr:* {response["raw_descr"]}
     """
     await update.message.reply_text(msg, parse_mode="Markdown")
     keyboard = InlineKeyboardMarkup(
@@ -241,7 +250,7 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         return ConversationHandler.END
     else:
         reply_keyboard = [
-        ["NAME", "DATE", "ARTISTS", "ORGANIZER","LOCATION","PRICE","LINK"]]
+        ["NAME", "DATE", "ARTISTS", "ORGANIZER","LOCATION","PRICE","LINK","RAW_DESCR"]]
 
         await query.message.reply_text(
             "What do you want to correct?",
@@ -278,6 +287,7 @@ async def correct(update: Update, context: ContextTypes.DEFAULT_TYPE):
 *Location:* {response["location"]}
 *Price:* {response["price"]}
 *Link:* {response["link"]}
+*Raw_descr:* {response["raw_descr"]}
     """
     await update.message.reply_text(msg, parse_mode="Markdown")
     keyboard = InlineKeyboardMarkup(
@@ -292,7 +302,7 @@ async def correct(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return CREATED_EVENT
 
 SELECTED_CONTENT, ASKED_FOR_CONTENT, CREATED_EVENT, ASKED_IF_CORRECT, SELECTED_PARAMETER_TO_CORRECT, ASKED_FOR_CORRECTION = range(6)
-MANUAL_START,MANUAL_NAME,MANUAL_DATE,MANUAL_ARTISTS,MANUAL_ORGANIZER,MANUAL_PRICE,MANUAL_LINK = range(6, 13)
+MANUAL_START,MANUAL_NAME,MANUAL_DATE,MANUAL_ARTISTS,MANUAL_ORGANIZER,MANUAL_PRICE,MANUAL_LINK,MANUAL_DESCR = range(6, 14)
 
 if __name__ == "__main__":
     application = ApplicationBuilder().token(TG_TOKEN).build()
@@ -305,7 +315,7 @@ if __name__ == "__main__":
             ASKED_FOR_CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO, answer)],
             CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
             SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
-                        "^(NAME|DATE|ARTISTS|ORGANIZER|LOCATION|PRICE|LINK)$"), ask_correction)],
+                        "^(NAME|DATE|ARTISTS|ORGANIZER|LOCATION|PRICE|LINK|RAW_DESCR)$"), ask_correction)],
             ASKED_FOR_CORRECTION: [MessageHandler(filters.TEXT, correct)],
         },
         fallbacks=[],
@@ -320,10 +330,11 @@ if __name__ == "__main__":
             MANUAL_ARTISTS: [MessageHandler(filters.TEXT, manual_organizer)],
             MANUAL_ORGANIZER: [MessageHandler(filters.TEXT, manual_price)],
             MANUAL_PRICE: [MessageHandler(filters.TEXT, manual_link)],
-            MANUAL_LINK: [MessageHandler(filters.TEXT, manual_end)],
+            MANUAL_LINK: [MessageHandler(filters.TEXT, manual_rawdescr)],
+            MANUAL_DESCR: [MessageHandler(filters.TEXT, manual_end)],
             CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
             SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
-                        "^(NAME|DATE|ARTISTS|ORGANIZER|LOCATION|PRICE|LINK)$"), ask_correction)],
+                        "^(NAME|DATE|ARTISTS|ORGANIZER|LOCATION|PRICE|LINK|RAW_DESCR)$"), ask_correction)],
             ASKED_FOR_CORRECTION: [MessageHandler(filters.TEXT, correct)]
         },
         fallbacks=[],

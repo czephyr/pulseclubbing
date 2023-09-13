@@ -13,3 +13,4 @@ instaloader
 fuzzywuzzy
 python-Levenshtein
 ftfy
+unidecode
