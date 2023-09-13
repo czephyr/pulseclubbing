@@ -1,5 +1,6 @@
 import logging
 import os
+import io
 import json
 import sqlite3
 
@@ -177,8 +178,9 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if "screen" in context.user_data['type_of_content']:
         #find a way not to save this shit?
         file = await context.bot.get_file(update.message.photo[-1].file_id)
-        await file.download_to_drive("./image.jpg")
-        extracted_text = pytesseract.image_to_string(Image.open("./image.jpg"))
+        io_stream = io.BytesIO(b"")
+        await file.download_to_memory(io_stream)
+        extracted_text = pytesseract.image_to_string(Image.open(io_stream))
         username, description = extracted_text.split(" ", 1)
         response = json.loads(get_event_info(description, source='instagram', key=OPEN_AI_KEY))
         context.user_data['event'] = response
