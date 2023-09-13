@@ -19,7 +19,7 @@ def insert_event_if_no_similar(conn, event):
        Returns None if successful"""
     cur = conn.cursor()
 
-    name,date,_,organizer,_,_,_ = event
+    name,date,_,organizer,_,_,_,_ = event
     try:
         datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
     except ValueError:

@@ -1,10 +1,11 @@
 import requests
-import pandas as pd
 import time
+import sqlite3
 from datetime import date
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from utils import clean_text
-
+from . import utils
+from . import db_handling
 
 CLUBS = { # IDs must be strings to perform the request correctly
     'forte-antenne': '190667',
@@ -15,7 +16,7 @@ CLUBS = { # IDs must be strings to perform the request correctly
     'nuur-tor-cervara': '215874'
 }
 
-def scrape(dataframe):
+def scrape():
     # Creating an empty list to store the flattened events for all clubs
     flattened_events = []
 
@@ -76,7 +77,7 @@ def scrape(dataframe):
             for event in events:
                 flat_event = {
                     'id': event['id'],
-                    'title': clean_text(event['title'], source='scraper'),
+                    'title': utils.clean_text(event['title'], source='scraper'),
                     'attending': event['attending'],
                     'date': event['date'],
                     'startTime': event['startTime'],
@@ -102,15 +103,12 @@ def scrape(dataframe):
                 # Adding the flattened event to the list
                 flattened_events.append(flat_event)
                 time.sleep(2)
-        except:
-            print(f'Error in scraping {club_name} events or no events found')
+        except Exception as exception:
+            print(f'Error {exception} in scraping {club_name} events or no events found')
 
-
-    # Creating a DataFrame from the flattened events
-    ra_df = pd.DataFrame(flattened_events)
-    ra_df = ra_df[['startTime', 'title', 'venue_name', 'contentUrl']].copy()
-    ra_df['startTime'] = pd.to_datetime(ra_df['startTime']).dt.strftime('%Y-%m-%d %H:%M:%S')
-    ra_df['contentUrl'] = 'https://ra.co' + ra_df['contentUrl']
-    ra_df.rename(columns={'startTime': 'date_and_time','title': 'name', 'venue_name': 'location', 'contentUrl': 'url'}, inplace=True)
-    
-    return pd.concat([dataframe, ra_df])
+    with sqlite3.connect('pulse.db') as connection:
+        for event in flattened_events:
+            date_object = datetime.strptime(event["startTime"],'%Y-%m-%dT%H:%M:%S.%f')
+            formatted_date_str = date_object.strftime("%Y-%m-%d %H:%M:%S")
+            
+            db_handling.insert_event_if_no_similar(conn=connection,event=(event["title"],formatted_date_str,event['artists'],event['club_name'],event['venue_name'],"-1","ra.com/events/1765016",""))

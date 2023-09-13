@@ -18,7 +18,7 @@ def update_webpage(db_connection, file_to_write:str):
 
     # Print the events grouped by date
     html_content = UPPER_PART
-    for date, events in events_by_day.items():
+    for date, events in sorted(events_by_day.items(),key=lambda x: datetime.strptime(x[0], '%Y-%m-%d')):
         if datetime.strptime(date, '%Y-%m-%d').day >= datetime.today().day:
             
             html_content += f'''
@@ -29,7 +29,7 @@ def update_webpage(db_connection, file_to_write:str):
 
             # Add each link as a list item
             for event in sorted(events,key=lambda x: datetime.strptime(x[2], '%Y-%m-%d %H:%M:%S')):
-                id,name,date,artists,organizer,location,price,link = event
+                id,name,date,artists,organizer,location,price,link,descr = event
                 html_content += f'''
                         <li>
                             <a href="{link}" target="_blank" db_id={id}>{organizer} - {name}</a>
