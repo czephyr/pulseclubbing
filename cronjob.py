@@ -1,14 +1,10 @@
-from scrape_rome import html_page, ig
+from scrape_rome import html_page, ig, ra, fanfulla
 from scrape_rome.db_handling import delete_row_by_id
 import sqlite3
 
 if __name__ == '__main__':
-    # THIS NEEDS TO BE REWRITTEN TO RETURN A LIST NOT A DF? Can return a df if too difficult
-    # just care about the event input of insert_event_if_no_similar
-    # df = pd.DataFrame()
-    # df = fanfulla.scrape(df)
-    # df = ra.scrape(df)
-    scraped_events = []
+    fanfulla.scrape()
+    ra.scrape()
     # ig.scrape_and_insert(ig.USERNAMES_TO_SCRAPE)
     with sqlite3.connect('pulse.db') as connection:
         # care, event dates have to be strings

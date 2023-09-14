@@ -1,13 +1,17 @@
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
-from datetime import datetime, date
+from datetime import datetime
+from . import utils
+from . import db_handling
+import sqlite3
 
 platforms = ['bandcamp', 'soundcloud', 'spotify', 'youtube', 'mixcloud']
 
-def scrape(dataframe):
-    html = requests.get("http://www.fanfulla5a.it/2023/06/01/programma-giugno-2023/").content
-    soup = BeautifulSoup(html, "lxml")
+def scrape():
+    html = requests.get('http://www.fanfulla5a.it/2023/09/11/programma-settembre-2023/').content
+    # TODO: We are now scraping the whole month, but at the moment we need to insert the link manually
+    soup = BeautifulSoup(html, 'lxml')
 
     events = soup.find_all('div', class_='siteorigin-widget-tinymce')
     events_list = []
@@ -19,20 +23,38 @@ def scrape(dataframe):
             day = datetime.strptime(f'{day} {datetime.now().month} {datetime.now().year}', '%d %m %Y')
         except Exception as e:
             print(e)
-            continue
-        event_dict["name"] = event.find('h4').text
-        event_dict["location"] = 'Fanfulla 5/A Circolo Arci'
-        time = event.find('span', class_='_4n-j fsl').text.split('dalle ore ')[1]
-        time = datetime.strptime(time, '%H').strftime('%H:%M')
-        try: 
-            event_dict['date_and_time'] = day.strftime('%Y-%m-%d') + ' ' + time + ':00'
-        except Exception as e:
-            print('error parsing date @ Fanfulla', e)
-            continue
-        urls = [a['href'] for a in event.find_all('a', href=True) if 'facebook' in a['href'] and 'event' in a['href']]
-        event_dict['url'] = urls[0] if urls else None
-        links = [a['href'] for a in event.find_all('a', href=True) if any(platform in a['href'] for platform in platforms)]
-        event_dict['artists_links'] = '; '.join(links)
-        events_list.append(event_dict)
-    fanfulla_events = pd.DataFrame(events_list)
-    return pd.concat([dataframe, fanfulla_events[['date_and_time', 'name', 'location', 'url']]])
+            pass
+        event_dict['title'] = event.find('h4').text
+        event_dict['location'] = 'Fanfulla 5/A Circolo Arci'
+        try:
+            time = event.find('span', class_='_4n-j fsl').text
+            try: # different time conventions
+                time = time.split('dalle ore ')[1]
+                if len(time) == 2:
+                    time = datetime.strptime(time, '%H')
+                elif '.' in time and len(time) == 5:
+                    time = time.replace('.', ':')
+                    time = datetime.strptime(time, '%H:%M')
+            except IndexError:
+                time = time.split('dalle ')[1]
+                if len(time) == 2:
+                    time = datetime.strptime(time, '%H')
+                elif '.' in time and len(time) == 5:
+                    time = time.replace('.', ':')
+                    time = datetime.strptime(time, '%H:%M')
+            time = time.strftime('%H:%M')
+            event_dict['date_and_time'] = day.replace(hour=int(time.split(':')[0]), minute=int(time.split(':')[1]))
+            event_dict["date_and_time"] = event_dict["date_and_time"].strftime('%Y-%m-%d %H:%M')
+            urls = [a['href'] for a in event.find_all('a', href=True) if 'facebook' in a['href'] and 'event' in a['href']]
+            event_dict['url'] = urls[0] if urls else None
+            # links = [a['href'] for a in event.find_all('a', href=True) if any(platform in a['href'] for platform in platforms)]
+            # event_dict['artists_links'] = '; '.join(links) # These two lines are commented because at the moment we don't need to store artists links
+            event_dict['description'] = event.text.strip()
+            events_list.append(event_dict)
+        except AttributeError as e:
+            print(f"Error for event {event_dict['title']} --- {e}")
+            pass
+
+    with sqlite3.connect('pulse.db') as connection:
+        for event in events_list:
+            db_handling.insert_event_if_no_similar(conn=connection,event=(event['title'],event['date_and_time'],'','Fanfulla 5/A','Via Fanfulla da Lodi, 5/a','Piccolo contributo + Tessera Arci', event['url'],event_dict['description']))
