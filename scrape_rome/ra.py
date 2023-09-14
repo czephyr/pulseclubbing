@@ -6,23 +6,25 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from . import utils
 from . import db_handling
+from .custom_logger import logger
 
 CLUBS = { # IDs must be strings to perform the request correctly
     'forte-antenne': '190667',
     'hotel-butterfly': '139767',
-    'wood-natural-bar': '216590',
+    # 'wood-natural-bar': '216590',
     'cieloterra': '165998',
     'andrea-doria': '32487',
     'nuur-tor-cervara': '215874'
 }
 
 def scrape():
+    logger.info("Scraping RA...")
     # Creating an empty list to store the flattened events for all clubs
     flattened_events = []
 
     # Looping through the clubs
     for club_name, club_value in CLUBS.items():
-        
+        logger.debug(f"scraping club {club_name} with ra ID {club_value}")
         headers = {
         'Accept': '*/*',
         'Accept-Encoding': 'gzip, deflate, br',
@@ -104,11 +106,12 @@ def scrape():
                 flattened_events.append(flat_event)
                 time.sleep(2)
         except Exception as exception:
-            print(f'Error {exception} in scraping {club_name} events or no events found')
+            logger.error(f'Error {exception} in scraping {club_name}')
 
     with sqlite3.connect('pulse.db') as connection:
         for event in flattened_events:
             date_object = datetime.strptime(event["startTime"],'%Y-%m-%dT%H:%M:%S.%f')
             formatted_date_str = date_object.strftime("%Y-%m-%d %H:%M:%S")
-            
-            db_handling.insert_event_if_no_similar(conn=connection,event=(event["title"],formatted_date_str,event['artists'],event['club_name'],event['venue_name'],"-1","ra.com/events/1765016",""))
+            club_name = event['club_name'].replace("-"," ").title()
+            logger.info(f"Inserting event {event['title']} from {event['club_name']} with date {formatted_date_str}")
+            db_handling.insert_event_if_no_similar(conn=connection,event=(event['title'],formatted_date_str,event['artists'],club_name,event['venue_name'],"-1","ra.com/events/1765016",""))

@@ -1,5 +1,6 @@
 from fuzzywuzzy.fuzz import token_sort_ratio
 from datetime import datetime
+from .custom_logger import logger
 
 def init_db(conn):
     """initializes new db new db"""
@@ -18,12 +19,11 @@ def insert_event_if_no_similar(conn, event):
     """Insert new event in db if no similar ones by organizer and name are found in the same date
        Returns None if successful"""
     cur = conn.cursor()
-
     name,date,_,organizer,_,_,_,_ = event
     try:
         datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
     except ValueError:
-        print(f"Error parsing date {date} for event {name} by {organizer}")
+        logger.error(f"Error parsing date {date} for event {name} by {organizer}")
         return None
     day_events_query = "SELECT name, organizer FROM events WHERE date=?"
     cur.execute(day_events_query,(date,))
@@ -32,20 +32,17 @@ def insert_event_if_no_similar(conn, event):
         if db_event_name == name and db_event_organizer == organizer:
             # this event has been inserted already and its double scraped, 
             # no need to do anything here 
+            logger.debug(f"event {name} already inserted")
             return (db_event_name,db_event_organizer)
-        if token_sort_ratio(db_event_name,name) > 75:
-            # TODO: send to telegram users a log about which event 
-            # was rejected for being too similar to one already present in db
+        if token_sort_ratio(db_event_name,name) > 75 and token_sort_ratio(db_event_organizer,organizer) > 75:
+            # rejected for being too similar to one already present in db
             # on the same day
-            return (db_event_name,db_event_organizer)
-        elif token_sort_ratio(db_event_organizer,organizer) > 75:
-            # TODO: send to telegram users a log about which event 
-            # was rejected for being too similar to one already present in db
-            # on the same day
+            logger.debug(f"event {name} too similar to {db_event_name}")
             return (db_event_name,db_event_organizer)
 
     insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link,raw_descr) VALUES(?,?,?,?,?,?,?,?)"
     cur.execute(insert_query, event)
+    logger.debug("inserted successfully")
     conn.commit()
     return None
 

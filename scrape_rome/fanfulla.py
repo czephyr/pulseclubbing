@@ -5,10 +5,12 @@ from datetime import datetime
 from . import utils
 from . import db_handling
 import sqlite3
+from .custom_logger import logger 
 
 platforms = ['bandcamp', 'soundcloud', 'spotify', 'youtube', 'mixcloud']
 
 def scrape():
+    logger.info("Scraping Fanfulla...")
     html = requests.get('http://www.fanfulla5a.it/2023/09/11/programma-settembre-2023/').content
     # TODO: We are now scraping the whole month, but at the moment we need to insert the link manually
     soup = BeautifulSoup(html, 'lxml')
@@ -52,9 +54,10 @@ def scrape():
             event_dict['description'] = event.text.strip()
             events_list.append(event_dict)
         except AttributeError as e:
-            print(f"Error for event {event_dict['title']} --- {e}")
+            logger.error(f"Error for event {event_dict['title']} --- {e}")
             pass
 
     with sqlite3.connect('pulse.db') as connection:
         for event in events_list:
+            logger.info(f"Inserting event {event['title']} from {'Fanfulla 5/A'} with date {event['date_and_time']}")
             db_handling.insert_event_if_no_similar(conn=connection,event=(event['title'],event['date_and_time'],'','Fanfulla 5/A','Via Fanfulla da Lodi, 5/a','Piccolo contributo + Tessera Arci', event['url'],event_dict['description']))

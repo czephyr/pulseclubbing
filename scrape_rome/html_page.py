@@ -1,5 +1,6 @@
 from datetime import datetime
 from collections import defaultdict
+from .custom_logger import logger
 
 from .db_handling import return_events_by_month
 
@@ -11,7 +12,6 @@ def update_webpage(db_connection, file_to_write:str):
     events_by_day = defaultdict(list)
     for event in events_in_db:
         # Parse the date string and extract only the date part
-        print(event)
         date = datetime.strptime(event[2], '%Y-%m-%d %H:%M:%S').date()
         # Add the event to the list of events for that date
         events_by_day[str(date)].append(event)
@@ -32,7 +32,7 @@ def update_webpage(db_connection, file_to_write:str):
                 id,name,date,artists,organizer,location,price,link,descr = event
                 html_content += f'''
                         <li>
-                            <a href="{link}" target="_blank" db_id={id}>{organizer} - {name}</a>
+                            <a href="{link}" target="_blank" db_id={id}>{organizer} || {name}</a>
                         </li>'''
 
             html_content += '''
@@ -43,6 +43,7 @@ def update_webpage(db_connection, file_to_write:str):
     
     # Write the HTML content to a file
     with open(file_to_write, 'w', encoding='utf-8') as file:
+        logger.info("Writing html page!")
         file.write(html_content)
 
 UPPER_PART = """
@@ -233,7 +234,7 @@ UPPER_PART = """
     <body class="blog">
     <header>
         <a class="title" href="/">
-            <h1>Pulse.</h1>
+            <h1>(((Pulse)))</h1>
         </a>
         <nav>
             <p><a href="/">Home</a> <a href="/next_month.html">Next Month</a> <a href="/past_events.html">Past Events</a></p>
