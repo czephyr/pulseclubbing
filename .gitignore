@@ -7,3 +7,4 @@ dev/
 telegram_bot
 image.jpg
 pulse.db
+*.ipynb

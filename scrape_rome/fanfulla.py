@@ -44,7 +44,7 @@ def scrape():
                     time = datetime.strptime(time, '%H:%M')
             time = time.strftime('%H:%M')
             event_dict['date_and_time'] = day.replace(hour=int(time.split(':')[0]), minute=int(time.split(':')[1]))
-            event_dict["date_and_time"] = event_dict["date_and_time"].strftime('%Y-%m-%d %H:%M')
+            event_dict["date_and_time"] = event_dict["date_and_time"].strftime('%Y-%m-%d %H:%M:%S')
             urls = [a['href'] for a in event.find_all('a', href=True) if 'facebook' in a['href'] and 'event' in a['href']]
             event_dict['url'] = urls[0] if urls else None
             # links = [a['href'] for a in event.find_all('a', href=True) if any(platform in a['href'] for platform in platforms)]
