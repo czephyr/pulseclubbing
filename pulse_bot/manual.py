@@ -12,7 +12,7 @@ from telegram.ext import (
     ConversationHandler,
     ContextTypes,
 )
-
+from .general import cancel
 from .new import save_or_correct, ask_correction, correct, CREATED_EVENT, SELECTED_PARAMETER_TO_CORRECT, ASKED_FOR_CORRECTION
 
 MANUAL_START,MANUAL_NAME,MANUAL_DATE,MANUAL_ARTISTS,MANUAL_ORGANIZER,MANUAL_PRICE,MANUAL_LINK,MANUAL_DESCR = range(6, 14)
@@ -34,7 +34,8 @@ This is the structure of the event data
 *Price:*
 *Link:*
 
-Start by sending me the name of the event
+Start by sending me the name of the event, 
+/cancel to cancel
     """
     await update.message.reply_text(msg, parse_mode="Markdown")
 
@@ -123,18 +124,18 @@ def create_manual_conv_handler():
     return ConversationHandler(
         entry_points=[CommandHandler("manual", manual_start)],
         states={
-            MANUAL_START: [MessageHandler(filters.TEXT, manual_name)],
-            MANUAL_NAME: [MessageHandler(filters.TEXT, manual_date)],
-            MANUAL_DATE: [MessageHandler(filters.TEXT, manual_artists)],
-            MANUAL_ARTISTS: [MessageHandler(filters.TEXT, manual_organizer)],
-            MANUAL_ORGANIZER: [MessageHandler(filters.TEXT, manual_price)],
-            MANUAL_PRICE: [MessageHandler(filters.TEXT, manual_link)],
-            MANUAL_LINK: [MessageHandler(filters.TEXT, manual_rawdescr)],
-            MANUAL_DESCR: [MessageHandler(filters.TEXT, manual_end)],
+            MANUAL_START: [MessageHandler(filters.TEXT & (~filters.COMMAND), manual_name)],
+            MANUAL_NAME: [MessageHandler(filters.TEXT & (~filters.COMMAND), manual_date)],
+            MANUAL_DATE: [MessageHandler(filters.TEXT & (~filters.COMMAND), manual_artists)],
+            MANUAL_ARTISTS: [MessageHandler(filters.TEXT & (~filters.COMMAND), manual_organizer)],
+            MANUAL_ORGANIZER: [MessageHandler(filters.TEXT & (~filters.COMMAND), manual_price)],
+            MANUAL_PRICE: [MessageHandler(filters.TEXT & (~filters.COMMAND), manual_link)],
+            MANUAL_LINK: [MessageHandler(filters.TEXT & (~filters.COMMAND), manual_rawdescr)],
+            MANUAL_DESCR: [MessageHandler(filters.TEXT & (~filters.COMMAND), manual_end)],
             CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
             SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
                         "^(NAME|DATE|ARTISTS|ORGANIZER|LOCATION|PRICE|LINK|RAW_DESCR)$"), ask_correction)],
-            ASKED_FOR_CORRECTION: [MessageHandler(filters.TEXT, correct)]
+            ASKED_FOR_CORRECTION: [MessageHandler(filters.TEXT & (~filters.COMMAND), correct)]
         },
-        fallbacks=[],
+        fallbacks=[CommandHandler("cancel", cancel)],
     )

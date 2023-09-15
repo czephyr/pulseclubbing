@@ -26,6 +26,8 @@ from scrape_rome.openai import get_event_info
 from scrape_rome import db_handling
 from scrape_rome.ig import return_username_caption
 from scrape_rome.custom_logger import logger
+from .general import cancel
+
 
 OPEN_AI_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -41,7 +43,7 @@ async def new(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
     await update.message.reply_text(
-        "What content are you sending?",
+        "What content are you sending? /cancel to cancel",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard,
             one_time_keyboard=True,
@@ -195,11 +197,11 @@ def create_new_conv_handler():
         states={
             SELECTED_CONTENT: [
                 MessageHandler(filters.Regex("^(IG LINK|FB LINK|IG SCREEN|FB SCREEN)$"), sendme)],
-            ASKED_FOR_CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO, answer)],
+            ASKED_FOR_CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO & (~ filters.COMMAND), answer)],
             CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
             SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
                         "^(NAME|DATE|ARTISTS|ORGANIZER|LOCATION|PRICE|LINK|RAW_DESCR)$"), ask_correction)],
-            ASKED_FOR_CORRECTION: [MessageHandler(filters.TEXT, correct)],
+            ASKED_FOR_CORRECTION: [MessageHandler(filters.TEXT & (~ filters.COMMAND), correct)],
         },
-        fallbacks=[],
+        fallbacks=[CommandHandler("cancel", cancel)],
     )

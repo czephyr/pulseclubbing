@@ -31,12 +31,12 @@ def scrape(delta_days):
     # DB is locked from concurrency
     with sqlite3.connect('pulse.db') as connection:
         for user in USERNAMES_TO_SCRAPE:
-            logger.debug(f"scraping insta user {user}")
+            logger.info(f"scraping insta user {user}")
 
             profile = instaloader.Profile.from_username(L.context, user)
             posts = profile.get_posts()
             for post in takewhile(lambda p: p.date > UNTIL, dropwhile(lambda p: p.date > SINCE, posts)):
-                logger.debug(f"handling post instagram.com/p/{post.shortcode}")
+                logger.info(f"handling post instagram.com/p/{post.shortcode}")
                 caption = post.caption
                 shortcode = post.shortcode
                 # no post caption, no scraping
@@ -47,7 +47,7 @@ def scrape(delta_days):
                         # json is empty, which means ChatGPT chose that the event is not 
                         # a club night
                         response = get_event_info(fix_text(caption.lower()), source='instagram', key=os.environ['OPENAI_API_KEY'], username=post.owner_username, link=f'instagram.com/p/{shortcode}')
-                        logger.debug(f"OpenAI: {response}")
+                        logger.info(f"OpenAI: {response}")
                         try:
                             response = response[response.find('{'):response.rfind('}')+1]
                             response = json.loads(response)
@@ -57,9 +57,9 @@ def scrape(delta_days):
                         event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"],caption)
                         db_handling.insert_event_if_no_similar(connection, event)
                     else:
-                        logger.debug('already scraped post, no action')
+                        logger.info('already scraped post, no action')
                 else:
-                    logger.debug("no caption found for post")
+                    logger.info("no caption found for post")
 
                 time.sleep(2)
             time.sleep(30)

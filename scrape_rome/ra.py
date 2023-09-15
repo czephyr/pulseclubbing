@@ -24,7 +24,7 @@ def scrape():
 
     # Looping through the clubs
     for club_name, club_value in CLUBS.items():
-        logger.debug(f"scraping club {club_name} with ra ID {club_value}")
+        logger.info(f"scraping club {club_name} with ra ID {club_value}")
         headers = {
         'Accept': '*/*',
         'Accept-Encoding': 'gzip, deflate, br',
