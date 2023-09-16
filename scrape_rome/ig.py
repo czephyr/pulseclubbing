@@ -35,7 +35,7 @@ def scrape(delta_days):
 
             profile = instaloader.Profile.from_username(L.context, user)
             posts = profile.get_posts()
-            for post in takewhile(lambda p: p.date > UNTIL, dropwhile(lambda p: p.date > SINCE, posts)):
+            for post in takewhile(lambda p: (p.date > UNTIL or p.is_pinned), dropwhile(lambda p: p.date >= SINCE, posts)):
                 logger.info(f"handling post instagram.com/p/{post.shortcode}")
                 caption = post.caption
                 shortcode = post.shortcode
