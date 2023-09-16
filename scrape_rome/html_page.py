@@ -228,6 +228,18 @@ UPPER_PART = """
             flex: unset;
         }
     }
+    @keyframes pulse {
+        0% { content: "(((Pulse)))"; }
+        20% { content: "((Pulse))"; }
+        40% { content: "(Pulse)"; }
+        60% { content: "Pulse"; }
+        80% { content: "(Pulse)"; }
+        100% { content: "((Pulse))"; }
+    }
+    h1::before {
+        content: "(((Pulse)))";
+        animation: pulse 1s infinite;
+    }
     </style>
     </head>
     
