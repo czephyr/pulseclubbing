@@ -32,7 +32,7 @@ def update_webpage(db_connection, file_to_write:str):
                 id,name,date,artists,organizer,location,price,link,descr = event
                 html_content += f'''
                         <li>
-                            <a href="{link}" target="_blank" db_id={id}>{organizer} || {name}</a>
+                            <a href="{link if link[:4] == 'http' else 'https://' + link}" target="_blank" db_id={id}>{organizer} || {name}</a>
                         </li>'''
 
             html_content += '''
