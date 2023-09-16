@@ -246,7 +246,7 @@ UPPER_PART = """
     <body class="blog">
     <header>
         <a class="title" href="/">
-            <h1>(((Pulse)))</h1>
+            <h1></h1>
         </a>
         <nav>
             <p><a href="/">Home</a> <a href="/next_month.html">Next Month</a> <a href="/past_events.html">Past Events</a></p>
