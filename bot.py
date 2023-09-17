@@ -23,7 +23,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Answers /start and explains the functionality of the bot"""
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="PulseRome started. Type /new to add an event, /manual to add a manual event",
+        text="PulseRome started. Type /new to add an event, /manual to add a manual event and /delete to delete an event",
+    )
+
+# /help command to explain the bot
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Answers /help and explains the functionality of the bot"""
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Use the command /new to add an event sending a link or a screenshot, /manual to manually add an event and /delete to delete an event",
+        parse_mode="Markdown",
     )
 
 if __name__ == "__main__":
@@ -37,6 +46,7 @@ if __name__ == "__main__":
     delete_conv_handler = delete_conv()
 
     start_handler = CommandHandler("start", start)
+    help_handler = CommandHandler("help", help)
     application.add_handler(start_handler)
     application.add_handler(new_conversation_handler)
     application.add_handler(manual_conversation_handler)
