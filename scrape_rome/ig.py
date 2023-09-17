@@ -48,7 +48,7 @@ def scrape(delta_days):
                         #TODO: create a logic to recognize when the returned 
                         # json is empty, which means ChatGPT chose that the event is not 
                         # a club night
-                        response = get_event_info(fix_text(caption.lower()), source='instagram', key=os.environ['OPENAI_API_KEY'], username=post.owner_username, link=f'instagram.com/p/{shortcode}')
+                        response = get_event_info(fix_text(caption.lower()), source='instagram', key=os.environ['OPENAI_API_KEY'], username=post.owner_username, link=f'https://instagram.com/p/{shortcode}')
                         logger.info(f"OpenAI: {response}")
                         try:
                             response = response[response.find('{'):response.rfind('}')+1]
