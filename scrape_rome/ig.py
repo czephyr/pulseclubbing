@@ -24,6 +24,8 @@ def scrape(delta_days):
     logger.info(f"Scraping IG with delta {delta_days}...")
     L = instaloader.Instaloader()
 
+    L.load_session_from_file(os.getenv("INSTAGRAM_USERNAME"),filename=os.getenv("INSTAGRAM_SESSION_FILE"))
+
     # will scrape posts not older than delta_days days
     SINCE = datetime.today()
     UNTIL = SINCE - timedelta(days=delta_days)
