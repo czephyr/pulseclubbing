@@ -25,7 +25,7 @@ def delete_row_by_name_and_organizer(conn, name, organizer):
         conn.commit()
         return row_exists[0]
     else:
-        return -1
+        return None
 
 def insert_event_if_no_similar(conn, event):
     """Insert new event in db if no similar ones by organizer and name are found in the same date
@@ -73,3 +73,14 @@ def return_valid_events_by_month(conn, date):
     cur.execute(day_events_query, (date.strftime('%Y'), date.strftime('%m')))
     return cur.fetchall()
 
+def update_is_clubbing(conn, event_id, is_clubbing):
+    cur = conn.cursor()
+    
+    cur.execute("SELECT * FROM events WHERE id?", (event_id,))
+    row_exists = cur.fetchone()
+    if row_exists:
+        cur.execute("UPDATE events SET is_clubbing = ? WHERE id=?", (str(is_clubbing),str(row_exists[0]),))
+        conn.commit()
+        return row_exists[0]
+    else:
+        return None
