@@ -5,7 +5,7 @@ from .custom_logger import logger
 def init_db(conn):
     """initializes new db new db"""
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE events (id INTEGER PRIMARY KEY, name TEXT, date TEXT, artists TEXT, organizer TEXT, location TEXT, price REAL, link TEXT, raw_descr TEXT, is_valid INT DEFAULT 0, is_clubbing INT DEFAULT 1)''')
+    cursor.execute('''CREATE TABLE events (id INTEGER PRIMARY KEY, name TEXT, date TEXT, artists TEXT, organizer TEXT, location TEXT, price REAL, link TEXT, raw_descr TEXT, is_valid INT DEFAULT 1, is_clubbing INT DEFAULT 1)''')
     cursor.execute('''CREATE TABLE ig_posts (id INTEGER PRIMARY KEY, shortcode TEXT)''')
     conn.commit()
 
