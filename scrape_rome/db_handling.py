@@ -5,14 +5,14 @@ from .custom_logger import logger
 def init_db(conn):
     """initializes new db new db"""
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE events (id INTEGER PRIMARY KEY, name TEXT, date TEXT, artists TEXT, organizer TEXT, location TEXT, price REAL, link TEXT, raw_descr TEXT)''')
+    cursor.execute('''CREATE TABLE events (id INTEGER PRIMARY KEY, name TEXT, date TEXT, artists TEXT, organizer TEXT, location TEXT, price REAL, link TEXT, raw_descr TEXT, is_valid INT DEFAULT 0)''')
     cursor.execute('''CREATE TABLE ig_posts (id INTEGER PRIMARY KEY, shortcode TEXT)''')
     conn.commit()
 
 def delete_row_by_id(conn, id):
     """Delete row by id"""
     cur = conn.cursor()
-    cur.execute("DELETE FROM events WHERE id=?", (id,))
+    cur.execute("UPDATE events SET is_valid = 0 WHERE id=?", (id,))
     conn.commit()
 
 def delete_row_by_name_and_organizer(conn, name, organizer):
@@ -21,7 +21,7 @@ def delete_row_by_name_and_organizer(conn, name, organizer):
     cur.execute("SELECT * FROM events WHERE name=? AND organizer=?", (name, organizer,))
     row_exists = cur.fetchone()
     if row_exists:
-        cur.execute("DELETE FROM events WHERE id=?", (str(row_exists[0]),))
+        cur.execute("UPDATE events SET is_valid = 0 WHERE id=?", (str(row_exists[0]),))
         conn.commit()
         return row_exists[0]
     else:
@@ -69,7 +69,7 @@ def is_igpost_shortcode_in_db(conn, shortcode):
 def return_events_by_month(conn, date):
     """Insert new event in db if no similar ones by organizer and name are found in the same date"""
     cur = conn.cursor()
-    day_events_query = "SELECT * FROM events WHERE date LIKE ? || '-' || ? || '-%'"
+    day_events_query = "SELECT * FROM events WHERE is_valid = 1 AND date LIKE ? || '-' || ? || '-%'"
     cur.execute(day_events_query, (date.strftime('%Y'), date.strftime('%m')))
     return cur.fetchall()
 
