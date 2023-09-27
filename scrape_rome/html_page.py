@@ -238,7 +238,7 @@ UPPER_PART = """
     }
     h1::before {
         content: "(((Pulse)))";
-        animation: pulse 1s infinite;
+        animation: pulse 2s infinite;
     }
     </style>
     </head>

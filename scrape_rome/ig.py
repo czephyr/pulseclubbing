@@ -11,7 +11,11 @@ import json
 from .custom_logger import logger
 
 
-USERNAMES_TO_SCRAPE = ['angelo_mai_roma', 'forte_antenne', 'nuur.xyz']
+USERNAMES_TO_SCRAPE = ['angelo_mai_roma',
+                       'forte_antenne',
+                       'nuur.xyz',
+                       'trenta_formiche',
+                       'arci_magma']
 
 def return_username_caption(link):
     """ Return caption and username from link"""
