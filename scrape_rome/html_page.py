@@ -2,11 +2,11 @@ from datetime import datetime
 from collections import defaultdict
 from .custom_logger import logger
 
-from .db_handling import return_events_by_month
+from .db_handling import return_valid_events_by_month
 
 def update_webpage(db_connection, file_to_write:str):
 
-    events_in_db = return_events_by_month(db_connection,datetime.today())
+    events_in_db = return_valid_events_by_month(db_connection,datetime.today())
 
     # group events by day
     events_by_day = defaultdict(list)
@@ -29,7 +29,7 @@ def update_webpage(db_connection, file_to_write:str):
 
             # Add each link as a list item
             for event in sorted(events,key=lambda x: datetime.strptime(x[2], '%Y-%m-%d %H:%M:%S')):
-                id,name,date,artists,organizer,location,price,link,descr = event
+                id,name,date,artists,organizer,location,price,link,descr,is_valid,is_clubbing = event
                 html_content += f'''
                         <li>
                             <a href="{link if link[:4] == 'http' else 'https://' + link}" target="_blank" db_id={id}>{organizer} || {name}</a>
