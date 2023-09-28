@@ -12,7 +12,7 @@ from .custom_logger import logger
 
 
 USERNAMES_TO_SCRAPE = ['angelo_mai_roma',
-                       'forte_antenne',
+                       # 'forte_antenne', # Removed 'cause they post too much 
                        'nuur.xyz',
                        'trenta_formiche',
                        'arci_magma']

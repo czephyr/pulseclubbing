@@ -49,30 +49,38 @@ def scrape():
 
 def scrape_link(url):
     logger.info(f'Scraping single {url} on Dice')
-    with sqlite3.connect('pulse.db') as connection:
+    try:
+        r = requests.get(url, headers=REQUEST_HEADER)
+        soup = BeautifulSoup(r.content, 'html.parser')
+        data = soup.find('script', type='application/ld+json').string
+        data = json.loads(data)
+        name = fix_text(data['name'])
+        startdate = data['startDate']
+        startdate = startdate.replace('T', ' ').split('+')[0]
+        organizer = data['location']['name']
+        address = data['location']['address']
+        description = fix_text(data['description'])
+        price = soup.find('div', class_='EventDetailsCallToAction__Price-sc-12zjeg-6')
+        price = ' '.join([p.text for p in price.find_all('span')])
         try:
-            r = requests.get(url, headers=REQUEST_HEADER)
-            soup = BeautifulSoup(r.content, 'html.parser')
-            data = soup.find('script', type='application/ld+json').string
-            data = json.loads(data)
-            name = fix_text(data['name'])
-            startdate = data['startDate']
-            startdate = startdate.replace('T', ' ').split('+')[0]
-            organizer = data['location']['name']
-            address = data['location']['address']
-            description = fix_text(data['description'])
-            price = soup.find('div', class_='EventDetailsCallToAction__Price-sc-12zjeg-6')
-            price = ' '.join([p.text for p in price.find_all('span')])
-            try:
-                # We are currently getting the entire lineup as a single string,
-                # when too long only few artists are shown and the rest is replaced by 'and x others'.
-                artists = soup.find('div', class_='EventDetailsLineup__ArtistTitle-gmffoe-10').text.strip()
-            except AttributeError:
-                # When there is no artist listed, the div is not present
-                artists = ''
-            event = (name, startdate, artists, organizer, address, price, url, description)
-            db_handling.insert_event_if_no_similar(connection, event)
-        except json.decoder.JSONDecodeError as e:
-            logger.error(f'JSONDecodeError: {e}')
-        except Exception as e:
-            logger.error(f'Exception: {e}')
+            # We are currently getting the entire lineup as a single string,
+            # when too long only few artists are shown and the rest is replaced by 'and x others'.
+            artists = soup.find('div', class_='EventDetailsLineup__ArtistTitle-gmffoe-10').text.strip()
+        except AttributeError:
+            # When there is no artist listed, the div is not present
+            artists = ''
+        response = {
+            "name": name,
+            "date": startdate,
+            "artists": artists,
+            "organizer": organizer,
+            "location": address,
+            "price": price,
+            "link": url,
+            "raw_descr": description
+        }
+        return response
+    except json.decoder.JSONDecodeError as e:
+        logger.error(f'JSONDecodeError: {e}')
+    except Exception as e:
+        logger.error(f'Exception: {e}')

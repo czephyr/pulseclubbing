@@ -24,7 +24,8 @@ from telegram.ext import (
 
 from scrape_rome.openai import get_event_info
 from scrape_rome import db_handling
-from scrape_rome.ig import return_username_caption
+from scrape_rome import ig
+from scrape_rome import dice
 from scrape_rome.custom_logger import logger
 from .general import cancel
 
@@ -36,7 +37,7 @@ SELECTED_CONTENT, ASKED_FOR_CONTENT, CREATED_EVENT, ASKED_IF_CORRECT, SELECTED_P
 async def new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Asks about the kind of content youre sending"""
     reply_keyboard = [
-        ["IG LINK", "FB LINK", "IG SCREEN", "FB SCREEN"]
+        ["IG LINK", "DICE LINK", "IG SCREEN", "FB SCREEN"]
     ]
     user = update.message.from_user
     logger.info(f'User {user["username"]} requested new event adding')
@@ -72,7 +73,6 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Then asks if the produced JSON is correct."""
     
     if "screen" in context.user_data['type_of_content']:
-        #find a way not to save this shit?
         file = await context.bot.get_file(update.message.photo[-1].file_id)
         io_stream = io.BytesIO(b"")
         await file.download_to_memory(io_stream)
@@ -83,12 +83,12 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     elif "link" in context.user_data['type_of_content']:
         text = update.message.text
         if 'instagram.com' in text:
-            description, username = return_username_caption(text)
+            description, username = ig.return_username_caption(text)
             result = json.loads(get_event_info(description, source='instagram', key=OPEN_AI_KEY, username=username, link=text))
             result["raw_descr"] = description
             context.user_data['event'] = response
-        elif 'facebook.com' in text:
-            response = "Sorry, I can't handle facebook links yet."
+        elif 'dice.fm' in text:
+            context.user_data['event'] = dice.scrape_link(text)
         else:
             response = "Sorry, I can't understand you. Use the command /help to see what I can do."   
     else:
@@ -196,7 +196,7 @@ def create_new_conv_handler():
         entry_points=[CommandHandler("new", new)],
         states={
             SELECTED_CONTENT: [
-                MessageHandler(filters.Regex("^(IG LINK|FB LINK|IG SCREEN|FB SCREEN)$"), sendme)],
+                MessageHandler(filters.Regex("^(IG LINK|DICE LINK|IG SCREEN|FB SCREEN)$"), sendme)],
             ASKED_FOR_CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO & (~ filters.COMMAND), answer)],
             CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
             SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
