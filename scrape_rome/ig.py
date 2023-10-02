@@ -60,8 +60,12 @@ def scrape(delta_days):
                         except(json.decoder.JSONDecodeError):
                             logger.error('Error decoding json')
                             continue
-                        event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"],caption)
-                        db_handling.insert_event_if_no_similar(connection, event)
+                        if not response:
+                            logger.info('Empty response from OpenAI')
+                            continue
+                        else:
+                            event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"],caption)
+                            db_handling.insert_event_if_no_similar(connection, event)
                     else:
                         logger.info('already scraped post, no action')
                 else:

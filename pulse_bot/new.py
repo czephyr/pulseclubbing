@@ -162,7 +162,7 @@ async def ask_correction(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ASKED_FOR_CORRECTION
 
 async def correct(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Saves kind of content that the user has selected and propts for the content"""
+    """Saves kind of content that the user has selected and prompts for the content"""
     parameter_to_correct = context.user_data['to_correct']
     logger.info(f"Correcting: {parameter_to_correct}")
     context.user_data['event'][parameter_to_correct] = update.message.text
