@@ -38,6 +38,8 @@ def check_similarity(event, rows):
         bool: True if the event is too similar to one already in the db for the same day
     """
     name,date,_,organizer,_,_,_,_ = event
+    if not rows:
+        return False
     for db_event_name, db_event_organizer in rows:
         if clean_text(db_event_organizer) == clean_text(organizer) and clean_text(db_event_name) == clean_text(name):
             return True
