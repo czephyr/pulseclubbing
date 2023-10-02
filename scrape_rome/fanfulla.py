@@ -11,7 +11,7 @@ platforms = ['bandcamp', 'soundcloud', 'spotify', 'youtube', 'mixcloud']
 
 def scrape():
     logger.info("Scraping Fanfulla...")
-    html = requests.get('http://www.fanfulla5a.it/2023/09/11/programma-settembre-2023/').content
+    html = requests.get('http://www.fanfulla5a.it/2023/10/01/programma-ottobre-2024-2/').content
     # TODO: We are now scraping the whole month, but at the moment we need to insert the link manually
     soup = BeautifulSoup(html, 'lxml')
 
