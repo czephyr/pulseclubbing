@@ -1,6 +1,7 @@
 from fuzzywuzzy.fuzz import token_sort_ratio
 from datetime import datetime
 from .custom_logger import logger
+from utils import check_similarity
 
 def init_db(conn):
     """initializes new db new db"""
@@ -40,23 +41,15 @@ def insert_event_if_no_similar(conn, event):
     day_events_query = "SELECT name, organizer FROM events WHERE date=?"
     cur.execute(day_events_query,(date,))
     rows = cur.fetchall()
-    for db_event_name, db_event_organizer in rows:
-        if db_event_name == name and db_event_organizer == organizer:
-            # this event has been inserted already and its double scraped, 
-            # no need to do anything here 
-            logger.info(f"event {name} already inserted")
-            return (db_event_name,db_event_organizer)
-        if token_sort_ratio(db_event_name,name) > 75 and token_sort_ratio(db_event_organizer,organizer) > 75:
-            # rejected for being too similar to one already present in db
-            # on the same day
-            logger.info(f"event {name} too similar to {db_event_name}")
-            return (db_event_name,db_event_organizer)
-
-    insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link,raw_descr) VALUES(?,?,?,?,?,?,?,?)"
-    cur.execute(insert_query, event)
-    logger.info("inserted successfully")
-    conn.commit()
-    return None
+    if check_similarity(event, rows):
+        logger.info(f"Event {name} too similar to one already present in db")
+        return None
+    else:
+        insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link,raw_descr) VALUES(?,?,?,?,?,?,?,?)"
+        cur.execute(insert_query, event)
+        logger.info("inserted successfully")
+        conn.commit()
+        return None
 
 def is_igpost_shortcode_in_db(conn, shortcode):
     """Return True when the passed shortcode is already in the db"""

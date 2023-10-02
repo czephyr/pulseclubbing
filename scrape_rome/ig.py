@@ -49,9 +49,6 @@ def scrape(delta_days):
                 if caption:
                     # if the shortcode is not in the db it means this is a new post and it needs to be scraped
                     if not db_handling.is_igpost_shortcode_in_db(connection, shortcode):
-                        #TODO: create a logic to recognize when the returned 
-                        # json is empty, which means ChatGPT chose that the event is not 
-                        # a club night
                         response = get_event_info(fix_text(caption.lower()), source='instagram', key=os.environ['OPENAI_API_KEY'], username=post.owner_username, link=f'https://instagram.com/p/{shortcode}')
                         logger.info(f"OpenAI: {response}")
                         try:
