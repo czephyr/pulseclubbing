@@ -4,7 +4,7 @@ import sqlite3
 from datetime import date
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from utils import clean_text
+from . import utils
 from . import db_handling
 from .custom_logger import logger
 
@@ -79,7 +79,7 @@ def scrape():
             for event in events:
                 flat_event = {
                     'id': event['id'],
-                    'title': clean_text(event['title'], source='resident_advisor'),
+                    'title': utils.clean_text(event['title'], source='resident_advisor'),
                     'attending': event['attending'],
                     'date': event['date'],
                     'startTime': event['startTime'],

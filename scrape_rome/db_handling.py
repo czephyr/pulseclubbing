@@ -1,7 +1,7 @@
 from fuzzywuzzy.fuzz import token_sort_ratio
 from datetime import datetime
 from .custom_logger import logger
-from utils import check_similarity
+from . import utils
 
 def init_db(conn):
     """initializes new db new db"""
@@ -41,7 +41,7 @@ def insert_event_if_no_similar(conn, event):
     day_events_query = "SELECT name, organizer FROM events WHERE date=?"
     cur.execute(day_events_query,(date,))
     rows = cur.fetchall()
-    if check_similarity(event, rows):
+    if utils.check_similarity(event, rows):
         logger.info(f"Event {name} too similar to one already present in db")
         return None
     else:
