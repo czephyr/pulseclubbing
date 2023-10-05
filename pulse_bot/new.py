@@ -29,8 +29,7 @@ from scrape_rome import ig
 from scrape_rome import dice
 from .general import cancel
 
-logger = logging.getLogger("myapp")
-
+logger = logging.getLogger("mannaggia")
 OPEN_AI_KEY = os.getenv("OPENAI_API_KEY")
 
 SELECTED_CONTENT, ASKED_FOR_CONTENT, CREATED_EVENT, ASKED_IF_CORRECT, SELECTED_PARAMETER_TO_CORRECT, ASKED_FOR_CORRECTION = range(6)
@@ -127,7 +126,7 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     logger.info(query.data)
     if query.data == "yes":
         response = context.user_data['event']
-        event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"])
+        event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"],response["raw_descr"])
         with sqlite3.connect('pulse.db') as connection:
             user = update.callback_query.from_user
             logger.info(f'User {user["username"]} inserting event {event[0]} by {event[3]} on date {event[1]}')

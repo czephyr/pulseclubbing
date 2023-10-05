@@ -18,7 +18,7 @@ from telegram.ext import (
 from scrape_rome import db_handling,html_page
 from .general import cancel
 
-logger = logging.getLogger("myapp")
+logger = logging.getLogger("mannaggia")
 
 ASKED_WHICH_EVENT, ASKED_IF_WAS_TECHNO = 15,16
 

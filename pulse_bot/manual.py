@@ -15,7 +15,7 @@ from telegram.ext import (
 from .general import cancel
 from .new import save_or_correct, ask_correction, correct, CREATED_EVENT, SELECTED_PARAMETER_TO_CORRECT, ASKED_FOR_CORRECTION
 
-logger = logging.getLogger("myapp")
+logger = logging.getLogger("mannaggia")
 
 MANUAL_START,MANUAL_NAME,MANUAL_DATE,MANUAL_ARTISTS,MANUAL_ORGANIZER,MANUAL_PRICE,MANUAL_LINK,MANUAL_DESCR = range(6, 14)
 

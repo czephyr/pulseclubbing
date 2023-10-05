@@ -1,8 +1,9 @@
 from datetime import datetime
 from collections import defaultdict
-from .custom_logger import logger
-
+import logging 
 from .db_handling import return_valid_events_by_month
+
+logger = logging.getLogger("mannaggia")
 
 def update_webpage(db_connection, file_to_write:str):
 

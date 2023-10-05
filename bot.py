@@ -13,8 +13,6 @@ from pulse_bot.new import create_new_conv_handler
 from pulse_bot.manual import create_manual_conv_handler
 from pulse_bot.delete import delete_conv
 
-logger = logging.getLogger("myapp")
-
 load_dotenv()
 TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
 
@@ -35,6 +33,21 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 if __name__ == "__main__":
+    logger = logging.getLogger("mannaggia")
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s | %(filename)s | %(levelname)s - %(message)s')
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(formatter)
+
+    fh = logging.FileHandler('app.log')
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    
+
+    logger.addHandler(ch)
+    logger.addHandler(fh)
 
     application = ApplicationBuilder().token(TG_TOKEN).build()
 

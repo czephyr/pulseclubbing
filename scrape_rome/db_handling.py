@@ -1,7 +1,20 @@
+import logging
 from fuzzywuzzy.fuzz import token_sort_ratio
 from datetime import datetime
-from .custom_logger import logger
 from . import utils
+from pydantic import BaseModel
+
+class Event(BaseModel):
+    name: str
+    date: str
+    artists: str
+    organizer: str
+    location: str
+    price: str
+    link: str
+    raw_descr: str
+
+logger = logging.getLogger("mannaggia")
 
 def init_db(conn):
     """initializes new db new db"""
@@ -32,7 +45,7 @@ def insert_event_if_no_similar(conn, event):
     """Insert new event in db if no similar ones by organizer and name are found in the same date
        Returns None if successful"""
     cur = conn.cursor()
-    name,date,_,organizer,_,_,_,_ = event
+    name,date,artists,organizer,location,price,link,raw_descr = event
     try:
         datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
     except ValueError:

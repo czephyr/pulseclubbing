@@ -1,10 +1,28 @@
 import sqlite3
 from scrape_rome import html_page, ig, ra, fanfulla, dice
-from scrape_rome.custom_logger import logger
 from dotenv import load_dotenv
+import logging
 
 if __name__ == '__main__':
     load_dotenv()  
+
+    logger = logging.getLogger("mannaggia")
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s | %(filename)s | %(levelname)s - %(message)s')
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(formatter)
+
+    fh = logging.FileHandler('app.log')
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    
+
+    logger.addHandler(ch)
+    logger.addHandler(fh)
+
+
 
     logger.info("-"*300)
     logger.info("Started new cronjob run")

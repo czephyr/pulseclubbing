@@ -1,4 +1,7 @@
 import openai
+import logging
+
+logger = logging.getLogger("mannaggia")
 
 def create_prompt(description, username='', link=''):
     messages = []

@@ -1,3 +1,4 @@
+import logging
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -5,8 +6,8 @@ from datetime import datetime
 from . import utils
 from . import db_handling
 import sqlite3
-from .custom_logger import logger 
 
+logger = logging.getLogger("mannaggia")
 platforms = ['bandcamp', 'soundcloud', 'spotify', 'youtube', 'mixcloud']
 
 def scrape():

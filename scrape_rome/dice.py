@@ -1,11 +1,13 @@
+import logging
 import requests
 import time
 import json
-from .custom_logger import logger
 from . import db_handling
 from ftfy import fix_text
 import sqlite3
 from bs4 import BeautifulSoup
+
+logger = logging.getLogger("mannaggia")
 
 VENUES_TO_SCRAPE = {
     # 'Monk': 'monk---sala-teatro-o58r', # Monk occasionally has orrible events, we'll check it manually

@@ -6,7 +6,9 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from . import utils
 from . import db_handling
-from .custom_logger import logger
+import logging 
+
+logger = logging.getLogger("mannaggia")
 
 CLUBS = { # IDs must be strings to perform the request correctly
     'forte-antenne': '190667',

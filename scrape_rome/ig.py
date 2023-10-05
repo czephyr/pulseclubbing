@@ -2,14 +2,16 @@ from datetime import datetime, timedelta
 from itertools import dropwhile, takewhile
 import time
 import os
+import logging
 import instaloader
 import sqlite3
 from ftfy import fix_text
 from . import db_handling
 from .openai import get_event_info
 import json
-from .custom_logger import logger
 from . import utils
+
+logger = logging.getLogger("mannaggia")
 
 USERNAMES_TO_SCRAPE = ['angelo_mai_roma',
                        # 'forte_antenne', # Removed 'cause they post too much 
