@@ -28,11 +28,11 @@ if __name__ == '__main__':
     date = utc.format('YYYY-MM-DD HH:mm')
     logger.info("-"*300)
     logger.info(f"Started new cronjob run {date}")
-    
+
     fanfulla.scrape()
     ra.scrape()
     try:
-        ig.scrape(delta_days=3)
+        ig.scrape(delta_days=5)
     except Exception as e:
         logger.error(e)
     dice.scrape()
