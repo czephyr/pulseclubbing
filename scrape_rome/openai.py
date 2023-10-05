@@ -1,61 +1,51 @@
-import openai
 import logging
+import os
+from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import LLMChain
+from langchain.output_parsers import StructuredOutputParser, ResponseSchema
+from langchain.prompts import PromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate
 
 logger = logging.getLogger("mannaggia")
 
-def create_prompt(description, username='', link=''):
-    messages = []
-    
-    # System instruction message
-    messages.append({
-        "role": "system",
-        "content": """
-        You're tasked with extracting event information from a caption.
-        The output should be a valid JSON, starting with { and ending with }.
-        The events you should focus on are primarily clubbing events in Rome.
-        If the event is related to theatre, cinema, film festival, or any non-musical event, YOU MUST return an empty JSON {}. Otherwise, extract the following:
-        - date: Format as %Y-%m-%d %H:%M:%S (remember that year is 2023 unless explicitly mentioned)
-        - name: Name of the event
-        - artists: Names of performing artists, separated by commas (they could be written as instagram usernames, in case try to prettify them)
-        - location: Venue of the event
-        - price: Ticket cost or 'Free' if explicitly mentioned
-        - organizer: Instagram username of the account posting the event
-        - link: URL to the Instagram profile posting the event, or dice.fm link
+def instagram_event(description):
+    template_string ="""You're tasked with extracting event information from the caption below delimited by triple backticks. The events you should focus on are clubbing events in Rome. If the event is related to theatre, cinema, film festival, or any non-musical event, YOU MUST return an empty JSON.
+    caption: ```{caption}```
+    {format_instructions}
+    """
 
-        Examples of non-clubbing events include: theatre shows, cinema nights, film festivals. For these, return an empty JSON {}.
-        """
-    })
-    
-    # If provided, append the username and link as separate user messages
-    if username:
-        messages.append({
-            "role": "user",
-            "content": f"Organizer: {username}"
-        })
-    if link:
-        messages.append({
-            "role": "user",
-            "content": f"Link: {link}"
-        })
-    
-    # Main event description
-    messages.append({
-        "role": "user",
-        "content": f"Caption: '{description}'"
-    })
+    response_schemas = [
+        ResponseSchema(name="date", description="Date formatted as %Y-%m-%d %H:%M:%S when not found in the caption the year is 2023"),
+        ResponseSchema(name="name", description="Name of the clubbing event"),
+        ResponseSchema(name="artists", description="Names of performing artists, separated by commas (they could be written as instagram usernames, in case remove the @"),
+        ResponseSchema(name="location", description="Venue of the event"),
+        ResponseSchema(name="price", description="Ticket cost or 'Free' if explicitly mentioned")
+    ]
+    output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
 
-    return messages
-
-def get_event_info(description, source, key, username='', link=''):
-    # At the moment, source is not used but it could be helpful in the future to handle different prompts
-    openai.api_key = key
-    
-    prompt_messages = create_prompt(description, username=username, link=link)
-    
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=prompt_messages
+    format_instructions = output_parser.get_format_instructions()
+    prompt = PromptTemplate(
+        template=template_string,
+        input_variables=["caption"],
+        partial_variables={"format_instructions": format_instructions}
     )
-    
-    # Extract the text from the assistant's response
-    return response.choices[0].message['content'].strip()
+
+    llm = ChatOpenAI(temperature=0.0, model="gpt-3.5-turbo", openai_api_key=os.environ["OPENAI_API_KEY"])
+
+    prompt = ChatPromptTemplate(
+        messages=[
+            HumanMessagePromptTemplate.from_template(template_string)  
+        ],
+        input_variables=["caption"],
+        partial_variables={"format_instructions": format_instructions},
+        output_parser=output_parser
+    )
+
+    chain = LLMChain(llm=llm, prompt=prompt)
+    try:
+        response = chain.predict_and_parse(caption=description)
+        if response:
+            return response
+    except Exception as xcp:
+        logger.error(xcp)
+        return None

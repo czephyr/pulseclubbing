@@ -16,3 +16,4 @@ ftfy
 unidecode
 pydantic
 arrow
+langchain
