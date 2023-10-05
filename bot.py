@@ -13,8 +13,7 @@ from pulse_bot.new import create_new_conv_handler
 from pulse_bot.manual import create_manual_conv_handler
 from pulse_bot.delete import delete_conv
 
-for name, logger in logging.root.manager.loggerDict.items():
-    logger.disabled=True
+logger = logging.getLogger("myapp")
 
 load_dotenv()
 TG_TOKEN = os.getenv("TELEGRAM_TOKEN")

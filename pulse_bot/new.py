@@ -2,6 +2,7 @@ import io
 import os
 import json
 import sqlite3
+import logging
 
 from PIL import Image
 import pytesseract
@@ -26,9 +27,9 @@ from scrape_rome.openai import get_event_info
 from scrape_rome import db_handling
 from scrape_rome import ig
 from scrape_rome import dice
-from scrape_rome.custom_logger import logger
 from .general import cancel
 
+logger = logging.getLogger("myapp")
 
 OPEN_AI_KEY = os.getenv("OPENAI_API_KEY")
 

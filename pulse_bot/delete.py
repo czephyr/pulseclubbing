@@ -1,4 +1,5 @@
 import sqlite3
+import logging
 
 from telegram import (
     Update,
@@ -14,9 +15,10 @@ from telegram.ext import (
     ContextTypes,
 )
 
-from scrape_rome.custom_logger import logger
 from scrape_rome import db_handling,html_page
 from .general import cancel
+
+logger = logging.getLogger("myapp")
 
 ASKED_WHICH_EVENT, ASKED_IF_WAS_TECHNO = 15,16
 
