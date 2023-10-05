@@ -25,7 +25,7 @@ def update_webpage(db_connection, file_to_write:str):
             html_content += f'''
                 <!-- Day block -->
                 <div>
-                    <h5>{date}</h5>
+                    <h5>{date} {date.strftime('%A')}</h5>
                     <ul>'''
 
             # Add each link as a list item
