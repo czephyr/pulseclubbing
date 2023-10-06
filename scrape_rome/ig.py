@@ -76,6 +76,7 @@ def scrape(delta_days):
                             caption,
                         )
                         db_handling.insert_event_if_no_similar(connection, event)
+                        db_handling.add_igpost_shortcode(connection,shortcode)
                     else:
                         logger.info("already scraped post, no action")
                 else:

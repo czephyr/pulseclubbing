@@ -64,6 +64,14 @@ def insert_event_if_no_similar(conn, event):
         conn.commit()
         return None
 
+def add_igpost_shortcode(conn, shortcode):
+    """Return True when the passed shortcode gets inserted in the db"""
+    cur = conn.cursor()
+    shortcode_query = "INSERT INTO ig_posts (shortcode) VALUES (?)"
+    cur.execute(shortcode_query,(shortcode,))
+    rows = cur.fetchall()
+    return len(rows) > 0
+
 def is_igpost_shortcode_in_db(conn, shortcode):
     """Return True when the passed shortcode is already in the db"""
     cur = conn.cursor()
