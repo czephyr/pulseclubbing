@@ -23,7 +23,7 @@ from telegram.ext import (
     ContextTypes,
 )
 
-from scrape_rome.openai import get_event_info
+from scrape_rome.openai import instagram_event
 from scrape_rome import db_handling
 from scrape_rome import ig
 from scrape_rome import dice
@@ -72,21 +72,28 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     On images does OCR and openai call, on links scrapes and openai call.
     Then asks if the produced JSON is correct."""
     
-    if "screen" in context.user_data['type_of_content']:
-        file = await context.bot.get_file(update.message.photo[-1].file_id)
-        io_stream = io.BytesIO(b"")
-        await file.download_to_memory(io_stream)
-        extracted_text = pytesseract.image_to_string(Image.open(io_stream))
-        username, description = extracted_text.split(" ", 1)
-        response = json.loads(get_event_info(description, source='instagram', key=OPEN_AI_KEY))
-        context.user_data['event'] = response
-    elif "link" in context.user_data['type_of_content']:
+    # if "screen" in context.user_data['type_of_content']:
+    #     file = await context.bot.get_file(update.message.photo[-1].file_id)
+    #     io_stream = io.BytesIO(b"")
+    #     await file.download_to_memory(io_stream)
+    #     extracted_text = pytesseract.image_to_string(Image.open(io_stream))
+    #     username, description = extracted_text.split(" ", 1)
+    #     response = json.loads(instagram_event(description, source='instagram', key=OPEN_AI_KEY))
+    #     context.user_data['event'] = response
+    if "link" in context.user_data['type_of_content']:
         text = update.message.text
         if 'instagram.com' in text:
             description, username = ig.return_username_caption(text)
-            result = json.loads(get_event_info(description, source='instagram', key=OPEN_AI_KEY, username=username, link=text))
-            result["raw_descr"] = description
-            context.user_data['event'] = response
+            result = json.loads(instagram_event(description))
+            event = (result["name"],
+                    result["date"],
+                    result["artists"],
+                    username,
+                    result["location"],
+                    result["price"],
+                    text,
+                    description)
+            context.user_data['event'] = event
         elif 'dice.fm' in text:
             context.user_data['event'] = dice.scrape_link(text)
         else:
