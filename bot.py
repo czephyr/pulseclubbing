@@ -16,6 +16,21 @@ from pulse_bot.delete import delete_conv
 
 load_dotenv()
 TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
+logger = logging.getLogger("mannaggia")
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s | %(filename)s | %(levelname)s - %(message)s')
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(formatter)
+
+fh = logging.FileHandler('app.log')
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+
+
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Answers /start and explains the functionality of the bot"""
@@ -33,23 +48,10 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown",
     )
 
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+    logger.error("Exception while handling an update:", exc_info=context.error)
+
 if __name__ == "__main__":
-    logger = logging.getLogger("mannaggia")
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s | %(filename)s | %(levelname)s - %(message)s')
-
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(formatter)
-
-    fh = logging.FileHandler('app.log')
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(formatter)
-    
-
-    logger.addHandler(ch)
-    logger.addHandler(fh)
-
     application = ApplicationBuilder().token(TG_TOKEN).build()
 
     new_conversation_handler = create_new_conv_handler()
@@ -64,5 +66,6 @@ if __name__ == "__main__":
     application.add_handler(new_conversation_handler)
     application.add_handler(manual_conversation_handler)
     application.add_handler(delete_conv_handler)
+    application.add_error_handler(error_handler)
 
     application.run_polling()
