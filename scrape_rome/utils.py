@@ -52,7 +52,6 @@ def check_similarity(event, rows):
         name_tsr = fuzz.token_sort_ratio(clean_text(db_event_name.lower()),clean_text(name.lower()))
         org_tsr = fuzz.token_sort_ratio(clean_text(db_event_organizer.lower()),clean_text(organizer.lower()))
         logger.debug(f"Name tsr: {name_tsr} and org tsr: {org_tsr}")
-        if name_tsr and org_tsr:
+        if name_tsr > 75 or org_tsr > 75:
             return True
-        else:
-            return False
+    return False

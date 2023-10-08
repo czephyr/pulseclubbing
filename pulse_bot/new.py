@@ -137,9 +137,9 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             user = update.callback_query.from_user
             logger.info(f'User {user["username"]} inserting event {event[0]} by {event[3]} on date {event[1]}')
             # care, event dates have to be strings
-            duplicated = db_handling.insert_event_if_no_similar(connection, event)
-            if duplicated:
-                await query.edit_message_text(f"This event is too similar to {duplicated[0]} by {duplicated[1]} happening on same date, won't be added.")
+            inserted = db_handling.insert_event_if_no_similar(connection, event)
+            if not inserted:
+                await query.edit_message_text("This event is too similar to one in db.")
             else:
                 await query.edit_message_text("Ok adding to database!")
 

@@ -59,10 +59,10 @@ def insert_event_if_no_similar(conn, event):
         return None
     else:
         insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link,raw_descr) VALUES(?,?,?,?,?,?,?,?)"
-        cur.execute(insert_query, event)
+        rows = cur.execute(insert_query, event)
         logger.info("inserted successfully")
         conn.commit()
-        return None
+        return len(rows) > 0
 
 def add_igpost_shortcode(conn, shortcode):
     """Return True when the passed shortcode gets inserted in the db"""
