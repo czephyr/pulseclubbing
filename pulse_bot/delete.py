@@ -59,7 +59,6 @@ async def was_it_clubbing(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     If the user pressed the No button then prompts the user for a correct version of the JSON"""
     query = update.callback_query
     await query.answer()
-    logger.info(query.data)
     event_id = context.user_data['id_event_to_delete']
     with sqlite3.connect('pulse.db') as connection:
         if query.data == "yes":
