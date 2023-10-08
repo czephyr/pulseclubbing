@@ -52,7 +52,7 @@ def insert_event_if_no_similar(conn, event):
         logger.error(f"Error parsing date {date} for event {name} by {organizer}")
         return None
     day_events_query = "SELECT name, organizer FROM events WHERE is_valid = 1 date LIKE ? || '-' || ? || '-' || ? || '%'"
-    cur.execute(day_events_query,(date.strftime('%Y'), date.strftime('%m'), date.strftime('%d')))
+    cur.execute(day_events_query,(date.strftime('%Y'), date.strftime('%m'), date.strftime('%d'), ))
     rows = cur.fetchall()
     if utils.check_similarity(event, rows):
         logger.info(f"Event {name} too similar to one already present in db")
