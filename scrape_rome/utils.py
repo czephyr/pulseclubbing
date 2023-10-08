@@ -45,35 +45,14 @@ def check_similarity(event, rows):
     if not rows:
         return False
     for db_event_name, db_event_organizer in rows:
-        logger.debug(f"Comparing event {db_event_name} and {name}")
-        if clean_text(db_event_organizer) == clean_text(organizer) and clean_text(db_event_name) == clean_text(name):
+        
+        logger.debug(f"Comparing event {db_event_name.lower()} and {name.lower()}")
+        if clean_text(db_event_organizer.lower()) == clean_text(organizer.lower()) and clean_text(db_event_name.lower()) == clean_text(name.lower()):
             return True
-        elif fuzz.token_sort_ratio(clean_text(db_event_name),clean_text(name)) > 75 and fuzz.token_sort_ratio(clean_text(db_event_organizer),clean_text(organizer)) > 75:
-            return True
-        elif fuzz.token_sort_ratio(clean_text(db_event_name),clean_text(name)) > 90:
-            return True
-        elif fuzz.token_sort_ratio(clean_text(db_event_organizer),clean_text(organizer)) > 90:
+        name_tsr = fuzz.token_sort_ratio(clean_text(db_event_name.lower()),clean_text(name.lower()))
+        org_tsr = fuzz.token_sort_ratio(clean_text(db_event_organizer.lower()),clean_text(organizer.lower()))
+        logger.debug(f"Name tsr: {name_tsr} and org tsr: {org_tsr}")
+        if name_tsr and org_tsr:
             return True
         else:
             return False
-        
-        # code to save the full json appending it to a file called skipped.txt, adding at the top of the json the date of the scraping without hours
-                                # and then continue
-                                # create file if not exists
-def skipped_handling(response):
-    """
-    #### Save the full json appending it to a file called skipped.txt
-
-    #### Args:
-        response (json): Response from OpenAI API
-
-    #### Returns:
-        None
-    """
-    with open('skipped.txt', 'a+') as f: # If file exists, append to it, else create it
-        f.seek(0) # Go to the beginning of the file
-        data = f.read(100)  # read the first 100 bytes
-        if len(data) > 0: # if the file is not empty
-            f.write("\n") # write a newline
-        f.write(f"{'-'*30}{datetime.now().strftime('%Y-%m-%d')}{'-'*30}\n{response}") # Write the data along with the json
-    return None
