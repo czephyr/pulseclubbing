@@ -47,7 +47,7 @@ def insert_event_if_no_similar(conn, event):
     cur = conn.cursor()
     name,date,artists,organizer,location,price,link,raw_descr = event
     try:
-        datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
+        date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
     except ValueError:
         logger.error(f"Error parsing date {date} for event {name} by {organizer}")
         return None
