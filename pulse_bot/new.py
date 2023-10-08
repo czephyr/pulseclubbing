@@ -130,7 +130,6 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     If the user pressed the No button then prompts the user for a correct version of the JSON"""
     query = update.callback_query
     await query.answer()
-    logger.info(query.data)
     if query.data == "yes":
         response = context.user_data['event']
         event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"],response["raw_descr"])
