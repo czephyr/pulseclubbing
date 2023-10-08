@@ -63,7 +63,7 @@ def insert_event_if_no_similar(conn, event):
         rows = cur.fetchall()
         logger.info("inserted successfully")
         conn.commit()
-        return len(rows) > 0
+        return True
 
 def add_igpost_shortcode(conn, shortcode):
     """Return True when the passed shortcode gets inserted in the db"""
