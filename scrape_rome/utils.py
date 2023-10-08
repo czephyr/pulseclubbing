@@ -45,6 +45,7 @@ def check_similarity(event, rows):
     if not rows:
         return False
     for db_event_name, db_event_organizer in rows:
+        logger.debug(f"Comparing event {db_event_name} and {name}")
         if clean_text(db_event_organizer) == clean_text(organizer) and clean_text(db_event_name) == clean_text(name):
             return True
         elif fuzz.token_sort_ratio(clean_text(db_event_name),clean_text(name)) > 75 and fuzz.token_sort_ratio(clean_text(db_event_organizer),clean_text(organizer)) > 75:
