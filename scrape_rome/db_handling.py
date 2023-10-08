@@ -59,7 +59,8 @@ def insert_event_if_no_similar(conn, event):
         return None
     else:
         insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link,raw_descr) VALUES(?,?,?,?,?,?,?,?)"
-        rows = cur.execute(insert_query, event)
+        cur.execute(insert_query, event)
+        rows = cur.fetchall()
         logger.info("inserted successfully")
         conn.commit()
         return len(rows) > 0
