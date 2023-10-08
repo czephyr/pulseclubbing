@@ -47,7 +47,7 @@ async def delete_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 ]
             ]
         )
-        await update.message.reply_text("Was it a non-clubbing event?", reply_markup=keyboard)
+        await update.message.reply_text("Was it a clubbing event?", reply_markup=keyboard)
         return ASKED_IF_WAS_TECHNO
     else:
         await update.message.reply_text("Couldn't find any event like that. Try /delete again.")

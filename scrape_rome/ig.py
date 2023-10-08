@@ -64,7 +64,6 @@ def scrape(delta_days):
                     # If the shortcode is not in the db it means this is a new post and it needs to be scraped
                     if not db_handling.is_igpost_shortcode_in_db(connection, shortcode):
                         response = instagram_event(caption)
-                        logger.info(f"OpenAI: {response}")
                         event = (
                             response["name"],
                             response["date"],
