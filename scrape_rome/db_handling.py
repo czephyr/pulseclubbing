@@ -90,7 +90,7 @@ def return_valid_events_by_month(conn, date):
 def update_is_clubbing(conn, event_id, is_clubbing):
     cur = conn.cursor()
     
-    cur.execute("SELECT * FROM events WHERE id?", (event_id,))
+    cur.execute("SELECT * FROM events WHERE id=?", (event_id,))
     row_exists = cur.fetchone()
     if row_exists:
         cur.execute("UPDATE events SET is_clubbing = ? WHERE id=?", (str(is_clubbing),str(row_exists[0]),))
