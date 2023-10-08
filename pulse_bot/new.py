@@ -27,6 +27,7 @@ from scrape_rome.openai import instagram_event
 from scrape_rome import db_handling
 from scrape_rome import ig
 from scrape_rome import dice
+from scrape_rome import html_page
 from .general import cancel
 
 logger = logging.getLogger("mannaggia")
@@ -142,6 +143,8 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 await query.edit_message_text("This event is too similar to one in db.")
             else:
                 await query.edit_message_text("Ok adding to database!")
+                html_page.update_webpage(connection,"www/gen_index.html")
+
 
         return ConversationHandler.END
     else:
