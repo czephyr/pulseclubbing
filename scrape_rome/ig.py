@@ -25,6 +25,9 @@ USERNAMES_TO_SCRAPE = [
 def return_username_caption(link):
     """Return caption and username from link"""
     L = instaloader.Instaloader()
+    L.load_session_from_file(
+        os.getenv("INSTAGRAM_USERNAME"), filename=os.getenv("INSTAGRAM_SESSION_FILE")
+    )
     post = instaloader.Post.from_shortcode(L.context, link.split("/")[-2])
     return post.caption, post.owner_username
 
