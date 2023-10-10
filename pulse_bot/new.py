@@ -86,14 +86,14 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         if 'instagram.com' in text:
             description, username = ig.return_username_caption(text)
             result = instagram_event(description)
-            event = (result["name"],
-                    result["date"],
-                    result["artists"],
-                    username,
-                    result["location"],
-                    result["price"],
-                    text,
-                    description)
+            event = {"name": result["name"],
+                    "date": result["date"],
+                    "artists":result["artists"],
+                    "organizer":username,
+                    "location":result["location"],
+                    "price";result["price"],
+                    "link":text,
+                    "raw_descr":description}
             context.user_data['event'] = event
         elif 'dice.fm' in text:
             context.user_data['event'] = dice.scrape_link(text)
