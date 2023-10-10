@@ -85,7 +85,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         text = update.message.text
         if 'instagram.com' in text:
             description, username = ig.return_username_caption(text)
-            result = json.loads(instagram_event(description))
+            result = instagram_event(description)
             event = (result["name"],
                     result["date"],
                     result["artists"],
