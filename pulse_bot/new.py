@@ -91,7 +91,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                     "artists":result["artists"],
                     "organizer":username,
                     "location":result["location"],
-                    "price";result["price"],
+                    "price":result["price"],
                     "link":text,
                     "raw_descr":description}
             context.user_data['event'] = event
