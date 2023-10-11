@@ -1,5 +1,6 @@
 import logging
 import os
+import arrow
 from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
@@ -15,7 +16,7 @@ def instagram_event(description):
     """
 
     response_schemas = [
-        ResponseSchema(name="date", description="Date formatted as %Y-%m-%d %H:%M:%S when not found in the caption the year is 2023"),
+        ResponseSchema(name="date", description=f"Date formatted as %Y-%m-%d %H:%M:%S, year is {arrow.now().year} if not found in the caption"),
         ResponseSchema(name="name", description="Name of the clubbing event"),
         ResponseSchema(name="artists", description="Names of performing artists, separated by commas (they could be written as instagram usernames, in case remove the @"),
         ResponseSchema(name="location", description="Venue of the event"),
