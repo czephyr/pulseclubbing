@@ -14,6 +14,11 @@ from telegram import (
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove
 )
+
+from telegram.helpers import (
+    escape_markdown
+)
+
 from telegram.ext import (
     CommandHandler,
     MessageHandler,
@@ -104,14 +109,14 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
     response = context.user_data['event']
     msg = f"""
-*Name:* {response["name"]}
-*Date:* {response["date"]}
-*Artists:* {response["artists"]}
-*Organizer:* {response["organizer"]}
-*Location:* {response["location"]}
-*Price:* {response["price"]}
-*Link:* {response["link"]}
-*Raw_descr:* {response["raw_descr"]}
+*Name:* {escape_markdown(response["name"])}
+*Date:* {escape_markdown(response["date"])}
+*Artists:* {escape_markdown(response["artists"])}
+*Organizer:* {escape_markdown(response["organizer"])}
+*Location:* {escape_markdown(response["location"])}
+*Price:* {escape_markdown(response["price"])}
+*Link:* {escape_markdown(response["link"])}
+*Raw_descr:* {escape_markdown(response["raw_descr"])}
     """
     await update.message.reply_text(msg, parse_mode="Markdown")
     keyboard = InlineKeyboardMarkup(
