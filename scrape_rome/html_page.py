@@ -24,7 +24,7 @@ def update_webpage(db_connection, file_to_write:str):
             
             html_content += f'''
                 <!-- Day block -->
-                <div>
+                <div class="divisor">
                     <h5>{datetime.strptime(date, '%Y-%m-%d').strftime('%A')} {datetime.strptime(date, '%Y-%m-%d').strftime('%d %B')}</h5>
                     <ul class="blog-posts">'''
 
@@ -220,6 +220,10 @@ UPPER_PART = """
     td {
         border: 1px dashed var(--heading-color);
         padding: 10px;
+    }
+
+    .divisor {
+        margin-bottom: 55px;
     }
 
     @media only screen and (max-width:767px) {
