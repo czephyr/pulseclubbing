@@ -12,6 +12,7 @@ logger = logging.getLogger("mannaggia")
 VENUES_TO_SCRAPE = {
     # 'Monk': 'monk---sala-teatro-o58r', # Monk occasionally has orrible events, we'll check it manually
     'Forte Antenne': 'forte-antenne-96yd',
+    'Hacienda': 'hacienda-6568',
 }
 
 REQUEST_HEADER = {

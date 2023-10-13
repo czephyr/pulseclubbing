@@ -13,13 +13,13 @@ from . import utils
 
 logger = logging.getLogger("mannaggia")
 
-USERNAMES_TO_SCRAPE = [
-    "angelo_mai_roma",
-    # 'forte_antenne', # Removed 'cause they post too much
-    "nuur.xyz",
-    "trenta_formiche",
-    "arci_magma",
-]
+USERNAMES_TO_SCRAPE = {
+    "Angelo Mai": "angelo_mai_roma",
+    # "Forte Antenne": "forte_antenne", # Removed 'cause they post too much
+    "Nuur": "nuur.xyz",
+    "Trenta Formiche": "trenta_formiche",
+    "Magma": "arci_magma",
+}
 
 
 def return_username_caption(link):
@@ -32,7 +32,6 @@ def return_username_caption(link):
     return post.caption, post.owner_username
 
 
-# Save all
 def scrape(delta_days):
     logger.info(f"Scraping IG with delta {delta_days}...")
     L = instaloader.Instaloader()
@@ -47,8 +46,8 @@ def scrape(delta_days):
 
     # DB is locked from concurrency
     with sqlite3.connect("pulse.db") as connection:
-        for user in USERNAMES_TO_SCRAPE:
-            logger.info(f"scraping insta user {user}")
+        for organizer, user in USERNAMES_TO_SCRAPE.items():
+            logger.info(f"scraping insta user {user} ({organizer})")
 
             profile = instaloader.Profile.from_username(L.context, user)
             posts = profile.get_posts()
@@ -59,7 +58,6 @@ def scrape(delta_days):
                 logger.info(f"handling post instagram.com/p/{post.shortcode}")
                 caption = post.caption
                 shortcode = post.shortcode
-                username = post.owner_username
                 link = f"https://instagram.com/p/{shortcode}"
                 # No post caption, no scraping
                 if caption:
@@ -71,7 +69,7 @@ def scrape(delta_days):
                             response["name"],
                             response["date"],
                             response["artists"],
-                            username,
+                            organizer,
                             response["location"],
                             response["price"],
                             link,

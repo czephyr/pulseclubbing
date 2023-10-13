@@ -88,7 +88,6 @@ UPPER_PART = """
     h2,
     h3,
     h4,
-    h5,
     h6 {
         font-family: var(--font-main);
         color: var(--heading-color);
@@ -96,7 +95,11 @@ UPPER_PART = """
     }
 
     h5 {
+        font-family: var(--font-main);
+        color: var(--heading-color);
         font-size: 1.1em;
+        line-height:0.9;
+        margin-bottom: 6px; 
     }    
 
     a {
