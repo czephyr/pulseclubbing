@@ -25,15 +25,15 @@ def update_webpage(db_connection, file_to_write:str):
             html_content += f'''
                 <!-- Day block -->
                 <div>
-                    <h5>{date} {datetime.strptime(date, '%Y-%m-%d').strftime('%A')}</h5>
-                    <ul>'''
+                    <h5>{datetime.strptime(date, '%Y-%m-%d').strftime('%A')} {datetime.strptime(date, '%Y-%m-%d').strftime('%d %B')}</h5>
+                    <ul class="blog-posts">'''
 
             # Add each link as a list item
             for event in sorted(events,key=lambda x: datetime.strptime(x[2], '%Y-%m-%d %H:%M:%S')):
                 id,name,date,artists,organizer,location,price,link,descr,is_valid,is_clubbing = event
                 html_content += f'''
                         <li>
-                            <a href="{link if link[:4] == 'http' else 'https://' + link}" target="_blank" db_id={id}>{organizer} || {name}</a>
+                            <a href="{link if link[:4] == 'http' else 'https://' + link}" target="_blank" db_id={id}><span class="underline-text">{organizer}</span> || {name}</a>
                         </li>'''
 
             html_content += '''
@@ -51,6 +51,7 @@ UPPER_PART = """
     <!DOCTYPE html>
     <html lang="en">
     <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
     <style>
 
 
@@ -94,6 +95,10 @@ UPPER_PART = """
         line-height:1.1;
     }
 
+    h5 {
+        font-size: 1.1em;
+    }    
+
     a {
         color: var(--link-color);
         cursor: pointer;
@@ -126,7 +131,7 @@ UPPER_PART = """
 
     nav a {
         margin-right: 8px;
-        font-size: .9em;
+        font-size: .8em;
         color:var(--background-color);
         text-decoration:none;
     }
@@ -228,7 +233,12 @@ UPPER_PART = """
         ul.blog-posts li span {
             flex: unset;
         }
+
+        .blog-posts li a .underline-text {
+            text-decoration: underline;
+        }
     }
+
     @keyframes pulse {
         0% { content: "(((Pulse)))"; }
         20% { content: "((Pulse))"; }
@@ -250,16 +260,14 @@ UPPER_PART = """
             <h1></h1>
         </a>
         <nav>
-            <p><a href="/">Home</a> <a href="/next_month.html">Next Month</a> <a href="/past_events.html">Past Events</a></p>
+            <p><a href="/">Home</a> <a href="/next_month.html">Next Month</a>
         </nav>
     </header>
 
     <main>
-        <ul class="blog-posts">
     """
 
 LOWER_PART = """
-        </ul>
     </main>
 
     <footer>
