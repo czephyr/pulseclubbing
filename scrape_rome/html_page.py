@@ -225,6 +225,10 @@ UPPER_PART = """
     .divisor {
         margin-bottom: 55px;
     }
+    
+    .blog-posts li a .underline-text {
+        text-decoration: underline;
+    }
 
     @media only screen and (max-width:767px) {
         main {
@@ -239,10 +243,6 @@ UPPER_PART = """
 
         ul.blog-posts li span {
             flex: unset;
-        }
-
-        .blog-posts li a .underline-text {
-            text-decoration: underline;
         }
     }
 
