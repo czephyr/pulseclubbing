@@ -19,8 +19,14 @@ logger = logging.getLogger("mannaggia")
 def init_db(conn):
     """initializes new db new db"""
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE events (id INTEGER PRIMARY KEY, name TEXT, date TEXT, artists TEXT, organizer TEXT, location TEXT, price REAL, link TEXT, raw_descr TEXT, is_valid INT DEFAULT 1, is_clubbing INT DEFAULT 1)''')
-    cursor.execute('''CREATE TABLE ig_posts (id INTEGER PRIMARY KEY, shortcode TEXT)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, name TEXT, date TEXT, artists TEXT, organizer TEXT, location TEXT, price REAL, link TEXT, raw_descr TEXT, is_valid INT DEFAULT 1, is_clubbing INT DEFAULT 1)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS ig_posts (id INTEGER PRIMARY KEY, shortcode TEXT)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS visit_stats (id INTEGER PRIMARY KEY, date TEXT, count INTEGER)''')
+    conn.commit()
+
+def insert_visits(conn, date, count):
+    cur = conn.cursor()
+    cur.execute("INSERT INTO visit_stats (date, count) VALUES (?, ?)", (date, count))
     conn.commit()
 
 def delete_row_by_id(conn, id):

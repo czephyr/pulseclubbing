@@ -50,7 +50,7 @@ async def manual_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Saves kind of content that the user has selected and propts for the content"""
     text = update.message.text
     context.user_data['event']['name'] = text
-    await update.message.reply_text("Send me the date in format YYYY-MM-DD HH:MM:SS")
+    await update.message.reply_text("Send me the date in format YYYY-MM-DD HH:mm:ss")
     return MANUAL_NAME
 
 async def manual_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
