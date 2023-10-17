@@ -24,16 +24,16 @@ def update_webpage(db_connection, file_to_write:str):
             
             html_content += f'''
                 <!-- Day block -->
-                <div>
-                    <h5>{date} {datetime.strptime(date, '%Y-%m-%d').strftime('%A')}</h5>
-                    <ul>'''
+                <div class="divisor">
+                    <h5>{datetime.strptime(date, '%Y-%m-%d').strftime('%A')} {datetime.strptime(date, '%Y-%m-%d').strftime('%d %B')}</h5>
+                    <ul class="blog-posts">'''
 
             # Add each link as a list item
             for event in sorted(events,key=lambda x: datetime.strptime(x[2], '%Y-%m-%d %H:%M:%S')):
                 id,name,date,artists,organizer,location,price,link,descr,is_valid,is_clubbing = event
                 html_content += f'''
                         <li>
-                            <a href="{link if link[:4] == 'http' else 'https://' + link}" target="_blank" db_id={id}>{organizer} || {name}</a>
+                            <a href="{link if link[:4] == 'http' else 'https://' + link}" target="_blank" db_id={id}><span class="underline-text">{organizer}</span> || {name}</a>
                         </li>'''
 
             html_content += '''
@@ -51,6 +51,7 @@ UPPER_PART = """
     <!DOCTYPE html>
     <html lang="en">
     <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
     <style>
 
 
@@ -87,12 +88,19 @@ UPPER_PART = """
     h2,
     h3,
     h4,
-    h5,
     h6 {
         font-family: var(--font-main);
         color: var(--heading-color);
         line-height:1.1;
     }
+
+    h5 {
+        font-family: var(--font-main);
+        color: var(--heading-color);
+        font-size: 1.1em;
+        line-height:0.9;
+        margin-bottom: 6px; 
+    }    
 
     a {
         color: var(--link-color);
@@ -126,7 +134,7 @@ UPPER_PART = """
 
     nav a {
         margin-right: 8px;
-        font-size: .9em;
+        font-size: .8em;
         color:var(--background-color);
         text-decoration:none;
     }
@@ -214,6 +222,14 @@ UPPER_PART = """
         padding: 10px;
     }
 
+    .divisor {
+        margin-bottom: 55px;
+    }
+    
+    .blog-posts li a .underline-text {
+        text-decoration: underline;
+    }
+
     @media only screen and (max-width:767px) {
         main {
             padding: 20px;
@@ -229,6 +245,7 @@ UPPER_PART = """
             flex: unset;
         }
     }
+
     @keyframes pulse {
         0% { content: "(((Pulse)))"; }
         20% { content: "((Pulse))"; }
@@ -250,16 +267,14 @@ UPPER_PART = """
             <h1></h1>
         </a>
         <nav>
-            <p><a href="/">Home</a> <a href="/next_month.html">Next Month</a> <a href="/past_events.html">Past Events</a></p>
+            <p><a href="/">Home</a> <a href="/next_month.html">Next Month</a>
         </nav>
     </header>
 
     <main>
-        <ul class="blog-posts">
     """
 
 LOWER_PART = """
-        </ul>
     </main>
 
     <footer>

@@ -45,13 +45,17 @@ def check_similarity(event, rows):
     logger.debug(rows)
     if not rows:
         return False
-    for db_event_name, db_event_organizer in rows:
-        
-        logger.debug(f"Comparing event {db_event_name.lower()} and {name.lower()}")
-        if clean_text(db_event_organizer.lower()) == clean_text(organizer.lower()) and clean_text(db_event_name.lower()) == clean_text(name.lower()):
+    for db_event_name, db_event_organizer in rows:       
+        logger.debug(f"Comparing event {db_event_name} and {name}")
+        # Variables holding cleane
+        clean_db_event_name = clean_text(db_event_name, source='comparison')
+        clean_name = clean_text(name, source='comparison')
+        clean_db_event_organizer = clean_text(db_event_organizer, source='comparison')
+        clean_organizer = clean_text(organizer, source='comparison')
+        if clean_db_event_name == clean_name and clean_db_event_organizer == clean_organizer:
             return True
-        name_tsr = fuzz.token_sort_ratio(clean_text(db_event_name.lower()),clean_text(name.lower()))
-        org_tsr = fuzz.token_sort_ratio(clean_text(db_event_organizer.lower()),clean_text(organizer.lower()))
+        name_tsr = fuzz.token_sort_ratio(clean_db_event_name, clean_name)
+        org_tsr = fuzz.token_sort_ratio(clean_db_event_organizer, clean_organizer)
         logger.debug(f"Name tsr: {name_tsr} and org tsr: {org_tsr}")
         if name_tsr > 75 or org_tsr > 75:
             return True
