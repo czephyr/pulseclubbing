@@ -1,6 +1,8 @@
 import os
 import logging
-import arrow
+from datetime import timedelta, datetime
+import sqlite3
+from scrape_rome import db_handling
 from telegram import (
     Update
 )
@@ -48,20 +50,29 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown",
     )
 
+async def callback_minute(context: ContextTypes.DEFAULT_TYPE):
+    with sqlite3.connect('pulse.db') as connection:
+        days = db_handling.visits_stats(connection)
+    msg = "Here are the visit counts from the past week \n"
+    for day,count in days:
+        msg += f"*{day} {datetime.strptime(day, '%Y-%m-%d').weekday()}*: {count}\n"
+    await context.bot.send_message(chat_id=474799562, text=msg, parse_mode="Markdown",)
+
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     logger.error("Exception while handling an update:", exc_info=context.error)
 
 if __name__ == "__main__":
     application = ApplicationBuilder().token(TG_TOKEN).build()
+    job_queue = application.job_queue
 
-    new_conversation_handler = create_new_conv_handler()
-
-    manual_conversation_handler = create_manual_conv_handler()
-
-    delete_conv_handler = delete_conv()
+    job_minute = job_queue.run_repeating(callback_minute, interval=timedelta(days=7), first=datetime.fromisoformat('2011-10-20 23:59:00.000'))
 
     start_handler = CommandHandler("start", start)
     help_handler = CommandHandler("help", help)
+    new_conversation_handler = create_new_conv_handler()
+    manual_conversation_handler = create_manual_conv_handler()
+    delete_conv_handler = delete_conv()
+
     application.add_handler(start_handler)
     application.add_handler(new_conversation_handler)
     application.add_handler(manual_conversation_handler)

@@ -35,6 +35,12 @@ def delete_row_by_id(conn, id):
     cur.execute("UPDATE events SET is_valid = 0 WHERE id=?", (id,))
     conn.commit()
 
+def visits_stats(conn):    
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM visit_stats ORDER BY date LIMIT 7")
+    this_week = cur.fetchall()
+    return [(date,visits) for (id,date,visits) in this_week]
+
 def delete_row_by_name_and_organizer(conn, name, organizer):
     cur = conn.cursor()
     
