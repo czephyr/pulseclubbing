@@ -154,7 +154,7 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         return ConversationHandler.END
     else:
         reply_keyboard = [
-        ["NAME", "DATE", "ARTISTS", "ORGANIZER","LOCATION","PRICE","LINK","RAW_DESCR"]]
+        ["NAME"], ["DATE"], ["ARTISTS"], ["ORGANIZER"],["LOCATION"],["PRICE"],["LINK"],["RAW_DESCR"]]
 
         await query.message.reply_text(
             "What do you want to correct?",
