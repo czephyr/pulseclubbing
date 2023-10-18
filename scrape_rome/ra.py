@@ -1,4 +1,5 @@
 import requests
+import random
 import time
 import sqlite3
 from datetime import date
@@ -11,12 +12,16 @@ import logging
 logger = logging.getLogger("mannaggia")
 
 CLUBS = { # IDs must be strings to perform the request correctly
-    'forte-antenne': '190667',
-    'hotel-butterfly': '139767',
-    # 'wood-natural-bar': '216590',
-    'cieloterra': '165998',
-    'andrea-doria': '32487',
-    'nuur-tor-cervara': '215874'
+    'Forte Antenne': '190667',
+    'Hotel Butterfly': '139767',
+    # 'Wood Natural Bar': '216590', # Solo stagione estiva
+    'Cieloterra': '165998',
+    'Andrea Doria': '32487',
+    'Nuur': '215874',
+    # 'Circolo Degli Illuminati': '36463',
+    'Brancaleone': '4916',
+    # 'Rashomon': '5861',
+    'La Redazione': '210246',
 }
 
 def scrape():
@@ -26,7 +31,7 @@ def scrape():
 
     # Looping through the clubs
     for club_name, club_value in CLUBS.items():
-        logger.info(f"scraping club {club_name} with ra ID {club_value}")
+        logger.info(f"Scraping club {club_name} with ID {club_value}")
         headers = {
         'Accept': '*/*',
         'Accept-Encoding': 'gzip, deflate, br',
@@ -76,7 +81,9 @@ def scrape():
         try:
             # Extracting the events
             events = response.json()['data']['listing']['data']
-
+            if not events:
+                logger.info(f"No events found for {club_name}")
+                continue
             # Looping through the events to flatten the nested structure
             for event in events:
                 flat_event = {
@@ -97,16 +104,14 @@ def scrape():
                     'area_name': event['venue']['area']['name'],
                     'country_id': event['venue']['area']['country']['id'],
                     'country_name': event['venue']['area']['country']['name'],
-                    'club_name': club_name  # Adding club name for reference
+                    'club_name': club_name
                 }
-
                 # Concatenating artist names
                 artist_names = ', '.join([artist['name'] for artist in event['artists']])
                 flat_event['artists'] = artist_names
-
                 # Adding the flattened event to the list
                 flattened_events.append(flat_event)
-                time.sleep(2)
+                time.sleep(2+random.uniform(0, 1))
         except Exception as exception:
             logger.error(f'Error {exception} in scraping {club_name}')
 
@@ -114,6 +119,5 @@ def scrape():
         for event in flattened_events:
             date_object = datetime.strptime(event["startTime"],'%Y-%m-%dT%H:%M:%S.%f')
             formatted_date_str = date_object.strftime("%Y-%m-%d %H:%M:%S")
-            club_name = event['club_name'].replace("-"," ").title()
             logger.info(f"Inserting event {event['title']} from {event['club_name']} with date {formatted_date_str}")
             db_handling.insert_event_if_no_similar(conn=connection,event=(event['title'],formatted_date_str,event['artists'],club_name,event['venue_name'],"-1",f"https://ra.co/events/{event['id']}",""))
