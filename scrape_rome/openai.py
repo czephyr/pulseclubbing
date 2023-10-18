@@ -47,6 +47,9 @@ def instagram_event(description):
         response = chain.predict_and_parse(caption=description)
         if response:
             logger.info(f"OpenAI response: {response}")
+            if response['name'] == '':
+                logger.info("Returned an empty name, no event returned")
+                return None
             return response
     except Exception as xcp:
         logger.error(xcp)

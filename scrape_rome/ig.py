@@ -55,7 +55,7 @@ def scrape(delta_days):
                 lambda p: (p.date > UNTIL or p.is_pinned),
                 dropwhile(lambda p: p.date >= SINCE, posts),
             ):
-                logger.info(f"handling post instagram.com/p/{post.shortcode}")
+                logger.info(f"Handling post: instagram.com/p/{post.shortcode}")
                 caption = post.caption
                 shortcode = post.shortcode
                 link = f"https://instagram.com/p/{shortcode}"
@@ -64,7 +64,11 @@ def scrape(delta_days):
                     caption = fix_text(caption.lower())
                     # If the shortcode is not in the db it means this is a new post and it needs to be scraped
                     if not db_handling.is_igpost_shortcode_in_db(connection, shortcode):
+                        db_handling.add_igpost_shortcode(connection,shortcode)
                         response = instagram_event(caption)
+                        if not response:
+                            logger.info("OpenAI returned an empty response")
+                            continue
                         event = (
                             response["name"],
                             response["date"],
@@ -76,7 +80,6 @@ def scrape(delta_days):
                             caption,
                         )
                         db_handling.insert_event_if_no_similar(connection, event)
-                        db_handling.add_igpost_shortcode(connection,shortcode)
                     else:
                         logger.info("already scraped post, no action")
                 else:

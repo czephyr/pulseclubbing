@@ -39,6 +39,7 @@ def scrape():
                     address = event['location']['address']
                     description = fix_text(event['description'])
                     event = (name, startdate, '', venue, address, '', url, description) # Artists and price are empty atm
+                    logging.info(f'Inserting event {name} from {venue} with date {startdate}')
                     db_handling.insert_event_if_no_similar(connection, event)
             except json.decoder.JSONDecodeError as e:
                 logger.error(f'JSONDecodeError: {e}')

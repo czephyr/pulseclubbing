@@ -1,4 +1,5 @@
 import io
+import re
 import os
 import json
 import sqlite3
@@ -89,8 +90,21 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if "link" in context.user_data['type_of_content']:
         text = update.message.text
         if 'instagram.com' in text:
+            shortcode = re.search(r"instagram\.com/p/([^/]+)/", text).group(1)
+            end = False
+            with sqlite3.connect('pulse.db') as connection:
+                if db_handling.is_igpost_shortcode_in_db(connection, shortcode):
+                    end = True
+                # TODO: Handle the case where the shortcode needs to be inserted 'cause the post is new
+                # Can't be handled here, it needs to be handled where we actually insert the event in db
+            if end:
+                await update.message.reply_text("This post has already been scraped.")
+                return ConversationHandler.END
             description, username = ig.return_username_caption(text)
             result = instagram_event(description)
+            if not result:
+                await update.message.reply_text("OpenAI returned an empty response.")
+                return ConversationHandler.END
             event = {"name": result["name"],
                     "date": result["date"],
                     "artists":result["artists"],
