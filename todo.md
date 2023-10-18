@@ -1,8 +1,9 @@
-- deployment is currently pulling in a folder in the home, then copying the files to the other folder, sucks
-- Telegram
-    - add interface to manually add events
-    - add telegram interface to accept or edit json
-    - add link handler for instagram
-    - add link handler for facebook
+todo:
 - integrate streaming platforms links or embeds (see fanfulla artists_links field)
-- create db of club name along with ig handles
+- fix that if the date is not correct format when given to bot everything fails
+    - thats also true sometimes when openai answers with a wrongly formatted date
+- make available and link next month page 
+rollout:
+- buy domain
+- add telegram group to website
+- stick qrs in real world places
