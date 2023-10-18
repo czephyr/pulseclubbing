@@ -3,7 +3,7 @@ requests
 bs4
 pandas
 python-dateutil
-python-telegram-bot 
+python-telegram-bot[job-queue]
 pytesseract 
 Pillow
 opencv-python-headless
