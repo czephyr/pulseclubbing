@@ -44,7 +44,7 @@ SELECTED_CONTENT, ASKED_FOR_CONTENT, CREATED_EVENT, ASKED_IF_CORRECT, SELECTED_P
 async def new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Asks about the kind of content youre sending"""
     reply_keyboard = [
-        ["IG LINK", "DICE LINK", "IG SCREEN", "FB SCREEN"]
+        ["IG LINK", "DICE LINK"] # The following were omitted, they do not work currently ["IG SCREEN", "FB SCREEN"]
     ]
     user = update.message.from_user
     logger.info(f'User {user["username"]} requested new event adding')
@@ -141,7 +141,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             ]
         ]
     )
-    await update.message.reply_text("is this correct?", reply_markup=keyboard)
+    await update.message.reply_text("Is this correct?", reply_markup=keyboard)
     return CREATED_EVENT
 
 async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -161,7 +161,7 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             if not inserted:
                 await query.edit_message_text("This event is too similar to one in db. Thanks for your help anyway!")
             else:
-                await query.edit_message_text("Ok adding to database!")
+                await query.edit_message_text("Ok adding to database! Thanks for your help!")
                 html_page.update_webpage(connection,"www/gen_index.html")
 
 
@@ -224,7 +224,7 @@ def create_new_conv_handler():
         entry_points=[CommandHandler("new", new)],
         states={
             SELECTED_CONTENT: [
-                MessageHandler(filters.Regex("^(IG LINK|DICE LINK)$"), sendme)], # The following has been momentarily omitted |IG SCREEN|FB SCREEN)$"), sendme)],
+                MessageHandler(filters.Regex("^(IG LINK|DICE LINK|IG SCREEN|FB SCREEN)$"), sendme)],
             ASKED_FOR_CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO & (~ filters.COMMAND), answer)],
             CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
             SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
