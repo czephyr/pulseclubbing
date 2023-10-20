@@ -3,7 +3,6 @@ from unidecode import unidecode
 import re
 from fuzzywuzzy import fuzz
 import logging
-from datetime import datetime
 
 logger = logging.getLogger("mannaggia")
 

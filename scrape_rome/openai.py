@@ -1,11 +1,10 @@
 import logging
 import os
 import arrow
-from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain.prompts import PromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
-from langchain.prompts import PromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate
 
 logger = logging.getLogger("mannaggia")
 

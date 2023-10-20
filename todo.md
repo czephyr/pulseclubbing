@@ -1,6 +1,7 @@
 todo:
 - To scrape: https://www.30formiche.it/#events
 - integrate streaming platforms links or embeds (see fanfulla artists_links field)
+- Scrape RA links on ig bot
 - fix that if the date is not correct format when given to bot everything fails
     - thats also true sometimes when openai answers with a wrongly formatted date
 - make available and link next month page 

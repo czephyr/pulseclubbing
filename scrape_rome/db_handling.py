@@ -1,5 +1,4 @@
 import logging
-from fuzzywuzzy.fuzz import token_sort_ratio
 from datetime import datetime
 from . import utils
 from pydantic import BaseModel
