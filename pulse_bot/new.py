@@ -89,6 +89,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     #     context.user_data['event'] = response
     if "link" in context.user_data['type_of_content']:
         text = update.message.text
+        logger.info(f"Link received: {text}")
         if 'instagram.com' in text:
             shortcode = re.search(r"instagram\.com/p/([^/]+)/", text).group(1)
             end = False
@@ -98,11 +99,13 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 # TODO: Handle the case where the shortcode needs to be inserted 'cause the post is new
                 # Can't be handled here, it needs to be handled where we actually insert the event in db
             if end:
+                logger.info(f"This post has already been scraped: {text}")
                 await update.message.reply_text("This post has already been scraped.")
                 return ConversationHandler.END
             description, username = ig.return_username_caption(text)
             result = instagram_event(description)
             if not result:
+                logger.info(f"OpenAI returned an empty response for {text}")
                 await update.message.reply_text("OpenAI returned an empty response.")
                 return ConversationHandler.END
             event = {"name": result["name"],
@@ -115,11 +118,20 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                     "raw_descr":description}
             context.user_data['event'] = event
         elif 'dice.fm' in text:
-            context.user_data['event'] = dice.scrape_link(text)
+            event = dice.scrape_link(text)
+            if not event:
+                logger.info(f"Couldn't scrape Dice: {text}")
+                await update.message.reply_text("Couldn't scrape this link, sorry!")
+                return ConversationHandler.END
+            context.user_data['event'] = event
         else:
-            response = "Sorry, I can't understand you. Use the command /help to see what I can do."   
+            response = "Sorry, I can't understand you. Use the command /help to see what I can do."
+            await update.message.reply_text(response)
+            return ConversationHandler.END
     else:
-        response = f'Couldn\'t parse your message.\nThis is your last recorded message: {update.message.text}.\n'
+        response = f'Couldn\'t parse your message.\nThis is your last recorded message: {update.message.text}.\n Use the command /help to see what I can do.'
+        await update.message.reply_text(response)
+        return ConversationHandler.END
     
     response = context.user_data['event']
     msg = f"""
@@ -151,20 +163,19 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     query = update.callback_query
     await query.answer()
     if query.data == "yes":
+        logger.info("User confirmed the event.")
         response = context.user_data['event']
         event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"],response["raw_descr"])
         with sqlite3.connect('pulse.db') as connection:
             user = update.callback_query.from_user
             logger.info(f'User {user["username"]} inserting event {event[0]} by {event[3]} on date {event[1]}')
-            # care, event dates have to be strings
             inserted = db_handling.insert_event_if_no_similar(connection, event)
             if not inserted:
+                logger.info(f"Event {event[0]} by {event[3]} on date {event[1]} is too similar to one in db")
                 await query.edit_message_text("This event is too similar to one in db. Thanks for your help anyway!")
             else:
                 await query.edit_message_text("Ok adding to database! Thanks for your help!")
                 html_page.update_webpage(connection,"www/gen_index.html")
-
-
         return ConversationHandler.END
     else:
         reply_keyboard = [
@@ -178,7 +189,6 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 input_field_placeholder="Select data to correct:",
             ),
         )
-
         return SELECTED_PARAMETER_TO_CORRECT
     
 
@@ -194,8 +204,6 @@ async def correct(update: Update, context: ContextTypes.DEFAULT_TYPE):
     parameter_to_correct = context.user_data['to_correct']
     logger.info(f"Correcting: {parameter_to_correct}")
     context.user_data['event'][parameter_to_correct] = update.message.text
-
-
     response = context.user_data['event']
     msg = f"""
 *Name:* {escape_markdown(response["name"])}

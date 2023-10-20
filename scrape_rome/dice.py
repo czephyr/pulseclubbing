@@ -83,8 +83,11 @@ def scrape_link(url):
             "link": url,
             "raw_descr": description
         }
+        logger.debug(f'Dice event response:\n{response}')
         return response
     except json.decoder.JSONDecodeError as e:
         logger.error(f'JSONDecodeError: {e}')
+        return None
     except Exception as e:
         logger.error(f'Exception: {e}')
+        return None
