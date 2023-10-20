@@ -159,7 +159,7 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             # care, event dates have to be strings
             inserted = db_handling.insert_event_if_no_similar(connection, event)
             if not inserted:
-                await query.edit_message_text("This event is too similar to one in db.")
+                await query.edit_message_text("This event is too similar to one in db. Thanks for your help anyway!")
             else:
                 await query.edit_message_text("Ok adding to database!")
                 html_page.update_webpage(connection,"www/gen_index.html")
@@ -224,7 +224,7 @@ def create_new_conv_handler():
         entry_points=[CommandHandler("new", new)],
         states={
             SELECTED_CONTENT: [
-                MessageHandler(filters.Regex("^(IG LINK|DICE LINK|IG SCREEN|FB SCREEN)$"), sendme)],
+                MessageHandler(filters.Regex("^(IG LINK|DICE LINK)$"), sendme)], # The following has been momentarily omitted |IG SCREEN|FB SCREEN)$"), sendme)],
             ASKED_FOR_CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO & (~ filters.COMMAND), answer)],
             CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
             SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
