@@ -92,6 +92,9 @@ async def manual_rawdescr(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Saves kind of content that the user has selected and propts for the content"""
     text = update.message.text
     context.user_data['event']['link'] = text
+    # for making sure that the shortcode gets added to db 
+    # once the event is actually saved in save_or_correct
+    context.user_data['instagram'] = True
     await update.message.reply_text("Send me the raw description of the event")
     return MANUAL_DESCR
 

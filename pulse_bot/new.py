@@ -36,7 +36,7 @@ from scrape_rome.openai import instagram_event
 from scrape_rome import db_handling
 from scrape_rome import ig
 from scrape_rome import dice
-from scrape_rome import html_page
+from scrape_rome import html_page, utils
 from .general import cancel
 
 logger = logging.getLogger("mannaggia")
@@ -94,17 +94,19 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         text = update.message.text
         logger.info(f"Link received: {text}")
         if 'instagram.com' in text:
-            shortcode = re.search(r"instagram\.com/p/([^/]+)/", text).group(1)
+            shortcode = utils.get_insta_shortcode(text)
             end = False
             with sqlite3.connect('pulse.db') as connection:
                 if db_handling.is_igpost_shortcode_in_db(connection, shortcode):
                     end = True
-                # TODO: Handle the case where the shortcode needs to be inserted 'cause the post is new
-                # Can't be handled here, it needs to be handled where we actually insert the event in db
             if end:
                 logger.info(f"This post has already been scraped: {text}")
                 await update.message.reply_text("This post has already been scraped.")
                 return ConversationHandler.END
+            else:
+                # for making sure that the shortcode gets added to db 
+                # once the event is actually saved in save_or_correct
+                context.user_data['instagram'] = True
             description, username = ig.return_username_caption(text)
             result = instagram_event(description)
             if not result:
@@ -178,6 +180,11 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 await query.edit_message_text("This event is too similar to one in db. Thanks for your help anyway!")
             else:
                 await query.edit_message_text("Ok adding to database! Thanks for your help!")
+                # for making sure that the shortcode gets added to db 
+                # should be set somewhere else 
+                if context.user_data.get('instagram'):
+                    shortcode = utils.get_insta_shortcode(response["link"])
+                    db_handling.add_igpost_shortcode(conn=connection,shortcode=shortcode)
                 html_page.update_webpage(connection,"www/gen_index.html",datetime.today())
                 html_page.update_webpage(connection,"www/next_month.html",datetime.today()+relativedelta(months=1))
 

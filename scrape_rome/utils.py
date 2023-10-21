@@ -60,3 +60,6 @@ def check_similarity(event, rows):
             logger.info(f"Event {name} too similar to one already present in db")
             return True
     return False
+
+def get_insta_shortcode(insta_link):
+    return re.search(r"instagram\.com/p/([^/]+)/", insta_link).group(1)
