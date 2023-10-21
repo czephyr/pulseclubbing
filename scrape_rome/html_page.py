@@ -18,7 +18,12 @@ def update_webpage(db_connection, file_to_write:str, date):
         events_by_day[str(date)].append(event)
 
     # Print the events grouped by date
-    html_content = get_upper_part(is_next_month=False) if date == datetime.today() else get_upper_part(is_next_month=True)
+    
+    html_content = "" 
+    if date == datetime.today():
+        html_content = get_upper_part(is_next_month=False)
+    else:
+        html_content = get_upper_part(is_next_month=True)    
     for date, events in sorted(events_by_day.items(),key=lambda x: datetime.strptime(x[0], '%Y-%m-%d')):
         if datetime.strptime(date, '%Y-%m-%d').day >= datetime.today().day:
             
