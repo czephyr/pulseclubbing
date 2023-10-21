@@ -14,7 +14,8 @@ from telegram.ext import (
     CallbackQueryHandler,
     ContextTypes,
 )
-
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from scrape_rome import db_handling,html_page
 from .general import cancel
 
@@ -37,7 +38,8 @@ async def delete_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['id_event_to_delete'] = deleted 
         user = update.message.from_user
         logger.info(f'User {user["username"]} deleted event {name} by {organizer}')
-        html_page.update_webpage(connection,"www/gen_index.html")
+        html_page.update_webpage(connection,"www/gen_index.html",datetime.today())
+        html_page.update_webpage(connection,"www/next_month.html",datetime.today()+relativedelta(months=1))
         await update.message.reply_text("Deleted the event.")
         keyboard = InlineKeyboardMarkup(
             [

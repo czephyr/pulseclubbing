@@ -94,7 +94,7 @@ def is_igpost_shortcode_in_db(conn, shortcode):
     return len(rows) > 0
 
 def return_valid_events_by_month(conn, date):
-    """Insert new event in db if no similar ones by organizer and name are found in the same date"""
+    """Return valid events from the db which are in the same month as the date passed"""
     cur = conn.cursor()
     day_events_query = "SELECT * FROM events WHERE is_valid = 1 AND date LIKE ? || '-' || ? || '-%'"
     cur.execute(day_events_query, (date.strftime('%Y'), date.strftime('%m')))

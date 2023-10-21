@@ -4,6 +4,9 @@ import json
 import sqlite3
 import logging
 
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
 from PIL import Image
 import pytesseract
 
@@ -148,7 +151,8 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 await query.edit_message_text("This event is too similar to one in db.")
             else:
                 await query.edit_message_text("Ok adding to database!")
-                html_page.update_webpage(connection,"www/gen_index.html")
+                html_page.update_webpage(connection,"www/gen_index.html",datetime.today())
+                html_page.update_webpage(connection,"www/next_month.html",datetime.today()+relativedelta(months=1))
 
 
         return ConversationHandler.END
