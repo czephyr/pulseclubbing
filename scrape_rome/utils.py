@@ -3,7 +3,6 @@ from unidecode import unidecode
 import re
 from fuzzywuzzy import fuzz
 import logging
-from datetime import datetime
 
 logger = logging.getLogger("mannaggia")
 
@@ -42,7 +41,6 @@ def check_similarity(event, rows):
         bool: True if the event is too similar to one already in the db for the same day
     """
     name,date,_,organizer,_,_,_,_ = event
-    logger.debug(rows)
     if not rows:
         return False
     for db_event_name, db_event_organizer in rows:       
@@ -53,10 +51,12 @@ def check_similarity(event, rows):
         clean_db_event_organizer = clean_text(db_event_organizer, source='comparison')
         clean_organizer = clean_text(organizer, source='comparison')
         if clean_db_event_name == clean_name and clean_db_event_organizer == clean_organizer:
+            logger.info(f"Event {name} already present in db")
             return True
         name_tsr = fuzz.token_sort_ratio(clean_db_event_name, clean_name)
         org_tsr = fuzz.token_sort_ratio(clean_db_event_organizer, clean_organizer)
         logger.debug(f"Name tsr: {name_tsr} and org tsr: {org_tsr}")
         if name_tsr > 75 or org_tsr > 75:
+            logger.info(f"Event {name} too similar to one already present in db")
             return True
     return False

@@ -1,11 +1,10 @@
 import logging
 import os
 import arrow
-from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain.prompts import PromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
-from langchain.prompts import PromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate
 
 logger = logging.getLogger("mannaggia")
 
@@ -47,6 +46,9 @@ def instagram_event(description):
         response = chain.predict_and_parse(caption=description)
         if response:
             logger.info(f"OpenAI response: {response}")
+            if response['name'] == '':
+                logger.info("Returned an empty name, no event returned")
+                return None
             return response
     except Exception as xcp:
         logger.error(xcp)

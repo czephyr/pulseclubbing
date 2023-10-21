@@ -1,5 +1,4 @@
 import logging
-from fuzzywuzzy.fuzz import token_sort_ratio
 from datetime import datetime
 from . import utils
 from pydantic import BaseModel
@@ -67,13 +66,12 @@ def insert_event_if_no_similar(conn, event):
     cur.execute(day_events_query,(date.strftime('%Y'), date.strftime('%m'), date.strftime('%d'),))
     rows = cur.fetchall()
     if utils.check_similarity(event, rows):
-        logger.info(f"Event {name} too similar to one already present in db")
         return None
     else:
         insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link,raw_descr) VALUES(?,?,?,?,?,?,?,?)"
         cur.execute(insert_query, event)
         rows = cur.fetchall()
-        logger.info("inserted successfully")
+        logger.info("Inserted successfully")
         conn.commit()
         return True
 
