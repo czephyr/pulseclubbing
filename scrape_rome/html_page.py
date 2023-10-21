@@ -5,9 +5,9 @@ from .db_handling import return_valid_events_by_month
 
 logger = logging.getLogger("mannaggia")
 
-def update_webpage(db_connection, file_to_write:str, date):
+def update_webpage(db_connection, file_to_write:str, cronjob_date):
 
-    events_in_db = return_valid_events_by_month(db_connection,date)
+    events_in_db = return_valid_events_by_month(db_connection,cronjob_date)
 
     # group events by day
     events_by_day = defaultdict(list)
@@ -20,7 +20,7 @@ def update_webpage(db_connection, file_to_write:str, date):
     # Print the events grouped by date
     
     html_content = "" 
-    if date.date() == datetime.today().date():
+    if cronjob_date.date() == datetime.today().date():
         html_content = get_upper_part(is_next_month=False)
     else:
         html_content = get_upper_part(is_next_month=True)    
