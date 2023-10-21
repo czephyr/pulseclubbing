@@ -20,7 +20,7 @@ def update_webpage(db_connection, file_to_write:str, date):
     # Print the events grouped by date
     
     html_content = "" 
-    if date == datetime.today():
+    if date.date() == datetime.today().date():
         html_content = get_upper_part(is_next_month=False)
     else:
         html_content = get_upper_part(is_next_month=True)    
