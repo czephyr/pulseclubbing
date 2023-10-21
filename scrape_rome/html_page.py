@@ -48,7 +48,7 @@ def update_webpage(db_connection, file_to_write:str, date):
         file.write(html_content)
 
 def get_upper_part(is_next_month):
-    next_month_button = '<a href="/next_month.html">Next Month</a>' if is_next_month else ''
+    next_month_button = '<a href="/next_month">Next Month</a>' if is_next_month else ''
 
 
     UPPER_PART = """
