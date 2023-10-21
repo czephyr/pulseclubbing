@@ -195,11 +195,17 @@ def get_upper_part(is_next_month):
 
         .title h1 {
             font-size: 2em;
-            /*padding: 5px 10px;
-            /*background: var(--heading-color);*/
             color: var(--text-color);
             font-weight: 400;
             text-align:center;
+            margin-bottom: 15px;
+        }
+
+        .telegram-link {
+            font-size: 0.8em; 
+            text-align: center;
+            margin-top: 0px;
+            margin-bottom: 30px;
         }
 
         .inline {
@@ -247,7 +253,7 @@ def get_upper_part(is_next_month):
             margin-bottom: 55px;
         }
         
-        .blog-posts li a .underline-text {
+        .underline-text {
             text-decoration: underline;
         }
 
@@ -287,6 +293,7 @@ def get_upper_part(is_next_month):
             <a class="title" href="/">
                 <h1></h1>
             </a>
+            <p class="telegram-link"><a href="https://t.me/quindistase" target="_blank">Join the Telegram group: <span class="underline-text">@quindistase</span></a></p>
             <nav>
                 <p><a href="/">Home</a></p><p>""" + next_month_button +"""</oomp>
             </nav>
