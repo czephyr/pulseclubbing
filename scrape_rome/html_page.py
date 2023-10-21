@@ -131,14 +131,26 @@ def get_upper_part(is_next_month):
         }
 
         nav {
-        background: var(--text-color);
-        text-transform: uppercase;
-        letter-spacing: 0.3em;
+          background: var(--text-color);
+          text-transform: uppercase;
+          letter-spacing: 0.3em;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         }
 
         nav > p {
-        margin: 0;
-        padding: 10px 32px;
+          margin: 0;
+          padding: 10px 32px;
+          flex-grow: 1;
+        }
+
+        nav > p:first-child {
+          flex-grow: 1;
+        }
+
+        nav > p:last-child {
+          flex-grow: 0;
         }
 
         nav a {
@@ -276,7 +288,7 @@ def get_upper_part(is_next_month):
                 <h1></h1>
             </a>
             <nav>
-                <p><a href="/">Home</a>""" + next_month_button +"""</p>
+                <p><a href="/">Home</a></p><p>""" + next_month_button +"""</oomp>
             </nav>
         </header>
 
