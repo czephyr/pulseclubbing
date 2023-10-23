@@ -2,7 +2,8 @@ import logging
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
+import calendar
 from . import utils
 from . import db_handling
 import sqlite3
@@ -10,12 +11,70 @@ import sqlite3
 logger = logging.getLogger("mannaggia")
 platforms = ['bandcamp', 'soundcloud', 'spotify', 'youtube', 'mixcloud']
 
-def scrape():
-    logger.info("Scraping Fanfulla...")
-    html = requests.get('http://www.fanfulla5a.it/2023/10/01/programma-ottobre-2024-2/').content
-    # TODO: We are now scraping the whole month, but at the moment we need to insert the link manually
-    soup = BeautifulSoup(html, 'lxml')
 
+def get_program():
+    """Return the URL of the latest program for Fanfulla. \n
+    If the current day is in the last five days of the month, return the URL of the program for the next month.
+    
+    Returns:
+        str: URL of the program"""
+    
+    today = datetime.now()
+    # Check if it's the last five days of the month and get the month name and number
+    if today.day > calendar.monthrange(today.year, today.month)[1] - 5:
+        next_month = today.replace(day=1) + timedelta(days=31)
+        month = next_month.month
+        month_name = next_month.strftime("%B")
+    else:
+        month = today.month
+        month_name = today.strftime("%B")
+    
+    en_to_it = {
+        "January": "Gennaio",
+        "February": "Febbraio",
+        "March": "Marzo",
+        "April": "Aprile",
+        "May": "Maggio",
+        "June": "Giugno",
+        "July": "Luglio",
+        "August": "Agosto",
+        "September": "Settembre",
+        "October": "Ottobre",
+        "November": "Novembre",
+        "December": "Dicembre"
+    }
+    month_name_it = en_to_it.get(month_name)
+    
+    # Get the program page
+    response = requests.get('http://www.fanfulla5a.it/category/mese/')
+    soup = BeautifulSoup(response.text, 'lxml')
+
+    # Find the link to the program
+    program_link = None
+    articles = soup.find_all('article')
+    for article in articles:
+        header = article.find('h2', class_='archive-title')
+        if header and month_name_it in header.text:
+            program_link = header.find('a')['href']
+            break
+    return month, program_link
+
+
+def scrape():
+    """Scrape the latest program for Fanfulla 5/A and insert the events in the database"""
+    logger.info("Scraping Fanfulla...")
+    month, link = get_program()
+    if not link:
+        logger.error("No program link found for Fanfulla 5/A")
+        return
+    # Handle the case in which the program is for the next year
+    if month == 1 and datetime.now().month == 12:
+        year = datetime.now().year + 1
+    else:
+        year = datetime.now().year
+    logger.info(f"Found program link for Fanfulla 5/A: {link}")
+    html = requests.get(link).content
+    soup = BeautifulSoup(html, 'lxml')
     events = soup.find_all('div', class_='siteorigin-widget-tinymce')
     events_list = []
     for event in events:
@@ -23,7 +82,7 @@ def scrape():
         try:
             day = event.find('h3').text.strip()
             day = ''.join(filter(str.isdigit, day))
-            day = datetime.strptime(f'{day} {datetime.now().month} {datetime.now().year}', '%d %m %Y')
+            day = datetime.strptime(f'{day} {month} {year}', '%d %m %Y')
         except Exception as e:
             print(e)
             pass
