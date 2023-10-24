@@ -63,3 +63,7 @@ def check_similarity(event, rows):
 
 def get_insta_shortcode(insta_link):
     return re.search(r"instagram\.com/p/([^/]+)/?", insta_link).group(1)
+
+def check_date_format(date:str):
+    format = r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$'
+    return re.match(format, date)
