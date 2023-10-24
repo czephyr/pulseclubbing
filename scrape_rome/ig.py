@@ -85,5 +85,5 @@ def scrape(delta_days):
                 else:
                     logger.info("no caption found for post")
 
-                time.sleep(2)
-            time.sleep(30)
+                time.sleep(15)
+            time.sleep(60)
