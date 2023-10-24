@@ -175,6 +175,15 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             logger.info(f"User was passing wrong date {str(response['date'])}")
             context.user_data["wrong_date"] = True
             await query.edit_message_text(f"Date {str(response['date'])} is badly formatted, I need YYYY-MM-DD HH:mm:ss")
+            reply_keyboard = [["DATE"]]
+            await query.message.reply_text(
+            "Select the date parameter so we can correct it",
+            reply_markup=ReplyKeyboardMarkup(
+                reply_keyboard,
+                one_time_keyboard=True,
+                input_field_placeholder="Select the date parameter",
+            ),
+        )
             return SELECTED_PARAMETER_TO_CORRECT
         with sqlite3.connect('pulse.db') as connection:
             user = update.callback_query.from_user
@@ -213,7 +222,7 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 async def ask_correction(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Saves kind of content that the user has selected and propts for the content"""
     if context.user_data.get("wrong_date"):
-        context.user_data['to_correct'] = "date"
+        context.user_data['to_correct'] = update.message.text.lower()
         logger.info("Asking to correct wrong date")
         await update.message.reply_text(f"Send a correctly formatted date (YYYY-MM-DD HH:mm:ss), previous one was {context.user_data['event']['date']}")
         context.user_data.pop("wrong_date")
