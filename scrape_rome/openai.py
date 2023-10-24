@@ -1,6 +1,7 @@
 import logging
 import os
 import arrow
+import json
 from langchain.prompts import PromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
@@ -31,7 +32,7 @@ def instagram_event(description):
     )
 
     llm = ChatOpenAI(temperature=0.0, model="gpt-3.5-turbo", openai_api_key=os.environ["OPENAI_API_KEY"])
-
+    
     prompt = ChatPromptTemplate(
         messages=[
             HumanMessagePromptTemplate.from_template(template_string)  
@@ -40,16 +41,17 @@ def instagram_event(description):
         partial_variables={"format_instructions": format_instructions},
         output_parser=output_parser
     )
-
-    chain = LLMChain(llm=llm, prompt=prompt)
+    chain = LLMChain(llm=llm, prompt=prompt, output_parser=output_parser)
     try:
-        response = chain.predict_and_parse(caption=description)
+        response = chain.run(caption=description)
         if response:
             logger.info(f"OpenAI response: {response}")
             if response['name'] == '':
                 logger.info("Returned an empty name, no event returned")
                 return None
             return response
+    except json.decoder.JSONDecodeError:
+        logger.error("JSON Error, possibly empty response.")
     except Exception as xcp:
         logger.error(xcp)
         return None

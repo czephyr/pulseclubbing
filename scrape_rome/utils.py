@@ -62,4 +62,4 @@ def check_similarity(event, rows):
     return False
 
 def get_insta_shortcode(insta_link):
-    return re.search(r"instagram\.com/p/([^/]+)/", insta_link).group(1)
+    return re.search(r"instagram\.com/p/([^/]+)/?", insta_link).group(1)

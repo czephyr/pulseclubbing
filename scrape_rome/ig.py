@@ -8,8 +8,7 @@ import sqlite3
 from ftfy import fix_text
 from . import db_handling
 from .openai import instagram_event
-import json
-from . import utils
+import re
 
 logger = logging.getLogger("mannaggia")
 
@@ -22,13 +21,13 @@ USERNAMES_TO_SCRAPE = {
 }
 
 
-def return_username_caption(link):
+def return_username_caption(shortcode):
     """Return caption and username from link"""
     L = instaloader.Instaloader()
     L.load_session_from_file(
         os.getenv("INSTAGRAM_USERNAME"), filename=os.getenv("INSTAGRAM_SESSION_FILE")
     )
-    post = instaloader.Post.from_shortcode(L.context, link.split("/")[-2])
+    post = instaloader.Post.from_shortcode(L.context, shortcode)
     return post.caption, post.owner_username
 
 

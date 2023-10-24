@@ -107,7 +107,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 # for making sure that the shortcode gets added to db 
                 # once the event is actually saved in save_or_correct
                 context.user_data['instagram'] = True
-            description, username = ig.return_username_caption(text)
+            description, username = ig.return_username_caption(shortcode)
             result = instagram_event(description)
             if not result:
                 logger.info(f"OpenAI returned an empty response for {text}")

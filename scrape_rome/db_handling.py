@@ -57,6 +57,9 @@ def insert_event_if_no_similar(conn, event):
        Returns None if successful"""
     cur = conn.cursor()
     name,date,artists,organizer,location,price,link,raw_descr = event
+
+    if date.count(':') != 2:
+        date += " 12:12:12"
     try:
         date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
     except ValueError:
