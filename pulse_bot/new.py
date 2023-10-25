@@ -195,9 +195,9 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             else:
                 await query.edit_message_text("Ok adding to database! Thanks for your help!")
                 # for making sure that the shortcode gets added to db 
-                # should be set already from somewhere else 
-                if context.user_data.get('instagram'):
-                    shortcode = utils.get_insta_shortcode(response["link"])
+                # should be set already from somewhere else
+                if 'instagram' in event[6]:
+                    shortcode = utils.get_insta_shortcode(event[6])
                     db_handling.add_igpost_shortcode(conn=connection,shortcode=shortcode)
                 html_page.update_webpage(connection,"www/gen_index.html",datetime.today())
                 html_page.update_webpage(connection,"www/next_month.html",datetime.today()+relativedelta(months=1))
