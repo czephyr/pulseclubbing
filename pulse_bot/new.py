@@ -104,10 +104,6 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 logger.info(f"This post has already been scraped: {text}")
                 await update.message.reply_text("This post has already been scraped.")
                 return ConversationHandler.END
-            else:
-                # for making sure that the shortcode gets added to db 
-                # once the event is actually saved in save_or_correct
-                context.user_data['instagram'] = True
             description, username = ig.return_username_caption(shortcode)
             result = instagram_event(description)
             if not result:
@@ -197,12 +193,9 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 await query.edit_message_text("This event is too similar to one in db. Thanks for your help anyway!")
             else:
                 await query.edit_message_text("Ok adding to database! Thanks for your help!")
-                # for making sure that the shortcode gets added to db 
-                # should be set already from somewhere else
                 if 'instagram' in event[6]:
                     shortcode = utils.get_insta_shortcode(event[6])
                     db_handling.add_igpost_shortcode(conn=connection,shortcode=shortcode)
-                    context.user_data.pop('instagram')
                 html_page.update_webpage(connection,"www/gen_index.html",datetime.today())
                 html_page.update_webpage(connection,"www/next_month.html",datetime.today()+relativedelta(months=1))
                 context.user_data.pop('event')
