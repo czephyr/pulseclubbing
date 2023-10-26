@@ -22,10 +22,12 @@ def update_webpage(db_connection, file_to_write:str, cronjob_date):
     html_content = "" 
     if cronjob_date.date() == datetime.today().date():
         html_content = get_upper_part(is_next_month=False)
+        day_to_compare = datetime.today().day
     else:
-        html_content = get_upper_part(is_next_month=True)    
+        html_content = get_upper_part(is_next_month=True)
+        day_to_compare = datetime.today().replace(day=1).day
     for date, events in sorted(events_by_day.items(),key=lambda x: datetime.strptime(x[0], '%Y-%m-%d')):
-        if datetime.strptime(date, '%Y-%m-%d').day >= datetime.today().day:
+        if datetime.strptime(date, '%Y-%m-%d').day >= day_to_compare:
             
             html_content += f'''
                 <!-- Day block -->
