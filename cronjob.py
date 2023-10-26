@@ -41,4 +41,4 @@ if __name__ == '__main__':
     with sqlite3.connect('pulse.db') as connection:
         # care, event dates have to be strings
         html_page.update_webpage(connection,"www/gen_index.html",datetime.today())
-        html_page.update_webpage(connection,"www/next_month.html",datetime.today()+relativedelta(months=1))
+        html_page.update_webpage(connection,"www/next_month.html",datetime.today().replace(day=1)+relativedelta(months=1))
