@@ -92,6 +92,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     #     context.user_data['event'] = response
     if "link" in context.user_data['type_of_content']:
         text = update.message.text
+        context.user_data.pop('type_of_content')
         logger.info(f"Link received: {text}")
         if 'instagram.com' in text:
             shortcode = utils.get_insta_shortcode(text)
@@ -134,6 +135,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await update.message.reply_text(response)
             return ConversationHandler.END
     else:
+        context.user_data.pop('type_of_content')
         response = f'Couldn\'t parse your message.\nThis is your last recorded message: {update.message.text}.\n Use the command /help to see what I can do.'
         await update.message.reply_text(response)
         return ConversationHandler.END
@@ -169,7 +171,7 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await query.answer()
     if query.data == "yes":
         logger.info("User confirmed the event.")
-        response = context.user_data['event']
+        response = context.user_data.get('event')
         event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"],response["raw_descr"])
         with sqlite3.connect('pulse.db') as connection:
             user = update.callback_query.from_user
@@ -177,6 +179,7 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             inserted = db_handling.insert_event_if_no_similar(connection, event)
             if not inserted:
                 logger.info(f"Event {event[0]} by {event[3]} on date {event[1]} is too similar to one in db")
+                context.user_data.pop('event')
                 await query.edit_message_text("This event is too similar to one in db. Thanks for your help anyway!")
             else:
                 await query.edit_message_text("Ok adding to database! Thanks for your help!")
@@ -185,8 +188,11 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 if context.user_data.get('instagram'):
                     shortcode = utils.get_insta_shortcode(response["link"])
                     db_handling.add_igpost_shortcode(conn=connection,shortcode=shortcode)
+                    context.user_data.pop('instagram')
                 html_page.update_webpage(connection,"www/gen_index.html",datetime.today())
                 html_page.update_webpage(connection,"www/next_month.html",datetime.today()+relativedelta(months=1))
+                context.user_data.pop('event')
+        
 
 
         return ConversationHandler.END
@@ -215,6 +221,7 @@ async def ask_correction(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def correct(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Saves kind of content that the user has selected and prompts for the content"""
     parameter_to_correct = context.user_data['to_correct']
+    context.user_data.pop('to_correct')
     logger.info(f"Correcting: {parameter_to_correct}")
     context.user_data['event'][parameter_to_correct] = update.message.text
     response = context.user_data['event']
@@ -252,5 +259,5 @@ def create_new_conv_handler():
                         "^(NAME|DATE|ARTISTS|ORGANIZER|LOCATION|PRICE|LINK|RAW_DESCR)$"), ask_correction)],
             ASKED_FOR_CORRECTION: [MessageHandler(filters.TEXT & (~ filters.COMMAND), correct)],
         },
-        fallbacks=[CommandHandler("cancel", cancel)],
+        fallbacks=[CommandHandler("cancel", cancel)],conversation_timeout=600
     )

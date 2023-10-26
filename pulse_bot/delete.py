@@ -62,6 +62,7 @@ async def was_it_clubbing(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     query = update.callback_query
     await query.answer()
     event_id = context.user_data['id_event_to_delete']
+    context.user_data.pop('id_event_to_delete')
     with sqlite3.connect('pulse.db') as connection:
         if query.data == "yes":
             is_clubbing = 1
@@ -82,5 +83,5 @@ def delete_conv():
             ASKED_WHICH_EVENT: [MessageHandler(filters.TEXT & (~ filters.COMMAND), delete_event)],
             ASKED_IF_WAS_TECHNO: [CallbackQueryHandler(was_it_clubbing)],
         },
-        fallbacks=[CommandHandler("cancel", cancel)],
+        fallbacks=[CommandHandler("cancel", cancel)],conversation_timeout=600
     )

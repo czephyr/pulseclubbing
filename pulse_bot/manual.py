@@ -145,5 +145,5 @@ def create_manual_conv_handler():
                         "^(NAME|DATE|ARTISTS|ORGANIZER|LOCATION|PRICE|LINK|RAW_DESCR)$"), ask_correction)],
             ASKED_FOR_CORRECTION: [MessageHandler(filters.TEXT & (~filters.COMMAND), correct)]
         },
-        fallbacks=[CommandHandler("cancel", cancel)],
+        fallbacks=[CommandHandler("cancel", cancel)],conversation_timeout=600
     )
