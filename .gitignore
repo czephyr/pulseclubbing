@@ -8,5 +8,6 @@ telegram_bot
 image.jpg
 pulse.db
 *.ipynb
+*.html
 .instagram-session-*
 app.log

@@ -24,9 +24,13 @@ USERNAMES_TO_SCRAPE = {
 def return_username_caption(shortcode):
     """Return caption and username from link"""
     L = instaloader.Instaloader()
-    L.load_session_from_file(
-        os.getenv("INSTAGRAM_USERNAME"), filename=os.getenv("INSTAGRAM_SESSION_FILE")
-    )
+    try:
+        L.load_session_from_file(
+            os.getenv("INSTAGRAM_USERNAME"), filename=os.getenv("INSTAGRAM_SESSION_FILE")
+        )
+    except Exception as e:
+        logger.error(f"Error loading session file: {e}")
+        pass
     post = instaloader.Post.from_shortcode(L.context, shortcode)
     return post.caption, post.owner_username
 
@@ -34,12 +38,15 @@ def return_username_caption(shortcode):
 def scrape(delta_days):
     logger.info(f"Scraping IG with delta {delta_days}...")
     L = instaloader.Instaloader()
-
-    L.load_session_from_file(
-        os.getenv("INSTAGRAM_USERNAME"), filename=os.getenv("INSTAGRAM_SESSION_FILE")
-    )
-
-    # will scrape posts not older than delta_days days
+    try:
+        L.load_session_from_file(
+            os.getenv("INSTAGRAM_USERNAME"), filename=os.getenv("INSTAGRAM_SESSION_FILE")
+        )
+    except Exception as e:
+        logger.error(f"Error loading session file: {e}")
+        pass
+    
+    # Scrape posts not older than delta_days days
     SINCE = datetime.today()
     UNTIL = SINCE - timedelta(days=delta_days)
 

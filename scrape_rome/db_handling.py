@@ -59,23 +59,25 @@ def insert_event_if_no_similar(conn, event):
     name,date,artists,organizer,location,price,link,raw_descr = event
 
     if date.count(':') != 2:
+        logger.info(f"Date {date} is not valid because it is missing the H:M:S, adding 12:12:12 to it")
         date += " 12:12:12"
     try:
-        date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
+        # Convert to datetime object and back to string to ensure consistent formatting
+        date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+        date_str = date.strftime('%Y-%m-%d %H:%M:%S')
     except ValueError:
         logger.error(f"Error parsing date {date} for event {name} by {organizer}")
         return None
     day_events_query = "SELECT name, organizer FROM events WHERE is_valid = 1 and date LIKE ? || '-' || ? || '-' || ? || ' %'"
     cur.execute(day_events_query,(date.strftime('%Y'), date.strftime('%m'), date.strftime('%d'),))
     rows = cur.fetchall()
-    if utils.check_similarity(event, rows):
+    if utils.check_similarity((name, date_str, artists, organizer, location, price, link, raw_descr), rows):
         return None
     else:
         insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link,raw_descr) VALUES(?,?,?,?,?,?,?,?)"
-        cur.execute(insert_query, event)
-        rows = cur.fetchall()
-        logger.info("Inserted successfully")
+        cur.execute(insert_query, (name, date_str, artists, organizer, location, price, link, raw_descr))
         conn.commit()
+        logger.info("Inserted successfully")
         return True
 
 def add_igpost_shortcode(conn, shortcode):

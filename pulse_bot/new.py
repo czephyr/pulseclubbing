@@ -173,6 +173,20 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         logger.info("User confirmed the event.")
         response = context.user_data.get('event')
         event = (response["name"],response["date"],response["artists"],response["organizer"],response["location"],response["price"],response["link"],response["raw_descr"])
+        if not utils.check_date_format(str(response["date"])):
+            logger.info(f"User was passing wrong date {str(response['date'])}")
+            context.user_data["wrong_date"] = True
+            await query.edit_message_text(f"Date {str(response['date'])} is badly formatted, I need YYYY-MM-DD HH:mm:ss")
+            reply_keyboard = [["DATE"]]
+            await query.message.reply_text(
+            "Select the date parameter so we can correct it",
+            reply_markup=ReplyKeyboardMarkup(
+                reply_keyboard,
+                one_time_keyboard=True,
+                input_field_placeholder="Select the date parameter",
+            ),
+        )
+            return SELECTED_PARAMETER_TO_CORRECT
         with sqlite3.connect('pulse.db') as connection:
             user = update.callback_query.from_user
             logger.info(f'User {user["username"]} inserting event {event[0]} by {event[3]} on date {event[1]}')
@@ -184,9 +198,9 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             else:
                 await query.edit_message_text("Ok adding to database! Thanks for your help!")
                 # for making sure that the shortcode gets added to db 
-                # should be set somewhere else 
-                if context.user_data.get('instagram'):
-                    shortcode = utils.get_insta_shortcode(response["link"])
+                # should be set already from somewhere else
+                if 'instagram' in event[6]:
+                    shortcode = utils.get_insta_shortcode(event[6])
                     db_handling.add_igpost_shortcode(conn=connection,shortcode=shortcode)
                     context.user_data.pop('instagram')
                 html_page.update_webpage(connection,"www/gen_index.html",datetime.today())
@@ -213,10 +227,17 @@ async def save_or_correct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 async def ask_correction(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Saves kind of content that the user has selected and propts for the content"""
-    context.user_data['to_correct'] = update.message.text.lower()
-    logger.info(f"Asked to correct: {context.user_data['to_correct']}")
-    await update.message.reply_text("Send me your correction:",reply_markup=ReplyKeyboardRemove())
-    return ASKED_FOR_CORRECTION
+    if context.user_data.get("wrong_date"):
+        context.user_data['to_correct'] = update.message.text.lower()
+        logger.info("Asking to correct wrong date")
+        await update.message.reply_text(f"Send a correctly formatted date (YYYY-MM-DD HH:mm:ss), previous one was {context.user_data['event']['date']}")
+        context.user_data.pop("wrong_date")
+        return ASKED_FOR_CORRECTION
+    else:
+        context.user_data['to_correct'] = update.message.text.lower()
+        logger.info(f"Asked to correct: {context.user_data['to_correct']}")
+        await update.message.reply_text("Send me your correction:",reply_markup=ReplyKeyboardRemove())
+        return ASKED_FOR_CORRECTION
 
 async def correct(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Saves kind of content that the user has selected and prompts for the content"""
