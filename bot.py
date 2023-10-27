@@ -55,7 +55,7 @@ async def callback_minute(context: ContextTypes.DEFAULT_TYPE):
         days = db_handling.visits_stats(connection)
     msg = "Here are the visit counts from the past week \n"
     for day,count in days:
-        msg += f"*{day} {datetime.strptime(day, '%Y-%m-%d').weekday()}*: {count}\n"
+        msg += f"*{day} {datetime.strptime(day, '%Y-%m-%d').strftime('%A')}*: {count}\n"
     await context.bot.send_message(chat_id=474799562, text=msg, parse_mode="Markdown",)
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
