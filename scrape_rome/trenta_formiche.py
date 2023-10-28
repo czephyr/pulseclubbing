@@ -21,7 +21,7 @@ def get_events():
     links = [url + link for link in links]
     return links
 
-def get_time(description=""):
+def get_time(description="", title=""):
     """
     Utility function to get the time from the description
 
@@ -41,7 +41,7 @@ def get_time(description=""):
             if len(time.split(":")) == 2:
                 time = time + ":00"
             return time
-    logger.warning("No time found in description, using arbitrary time 22:00:00")
+    logger.warning(f"No time found in description for event {title}, using arbitrary time 22:00:00")
     return "22:00:00"
 
 def scrape():
@@ -56,10 +56,10 @@ def scrape():
         try:
             r = requests.get(link)
             soup = BeautifulSoup(r.text, "html.parser")
-            title = soup.find("h1", {"class": "scroll-reveal"}).text
-            date = soup.find("i", {"class": "fa fa-calendar-o"}).text
+            title = soup.find("h1", {"class": "scroll-reveal"}).text.strip()
+            date = soup.find("div", {"class": "col-md-4"}).find("p").text.strip()
             description = soup.find("div", {"class": "event-description"}).text.strip()
-            time = get_time(description)
+            time = get_time(description, title)
             # Convert the date and time strings to a datetime object, then format it to a string
             date_and_time = datetime.strptime(date + ' ' + time, '%d %b %Y %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
             event_dict = {

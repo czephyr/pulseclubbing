@@ -1,5 +1,5 @@
 import sqlite3
-from scrape_rome import html_page, ig, ra, fanfulla, dice
+from scrape_rome import html_page, ig, ra, fanfulla, dice, trenta_formiche
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
@@ -32,6 +32,7 @@ if __name__ == '__main__':
     logger.info(f"Started new cronjob run {date}")
 
     fanfulla.scrape()
+    trenta_formiche.scrape()
     ra.scrape()
     try:
         ig.scrape(delta_days=5)

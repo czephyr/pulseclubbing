@@ -1,10 +1,8 @@
 import logging
 import requests
-import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import calendar
-from . import utils
 from . import db_handling
 import sqlite3
 
@@ -119,5 +117,17 @@ def scrape():
 
     with sqlite3.connect('pulse.db') as connection:
         for event in events_list:
-            logger.info(f"Inserting event {event['title']} from {'Fanfulla 5/A'} with date {event['date_and_time']}")
-            db_handling.insert_event_if_no_similar(conn=connection,event=(event['title'], event['date_and_time'],'','Fanfulla 5/A','Via Fanfulla da Lodi, 5/a','Piccolo contributo + Tessera Arci', event['url'],event_dict['description']))
+            logger.info(f"Inserting event {event['title']} from Fanfulla 5/A with date {event['date_and_time']}")
+            db_handling.insert_event_if_no_similar(
+                conn=connection,
+                    event=(
+                        event['title'],
+                        event['date_and_time'],
+                        '', # No way to have artists here at the moment
+                        'Fanfulla 5/A',
+                        'Via Fanfulla da Lodi, 5/a',
+                        'Piccolo contributo + Tessera Arci',
+                        event['url'],
+                        event_dict['description']
+                    )
+            )
