@@ -1,7 +1,5 @@
 import io
-import re
 import os
-import json
 import sqlite3
 import logging
 
@@ -47,7 +45,7 @@ SELECTED_CONTENT, ASKED_FOR_CONTENT, CREATED_EVENT, ASKED_IF_CORRECT, SELECTED_P
 async def new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Asks about the kind of content youre sending"""
     reply_keyboard = [
-        ["IG LINK", "DICE LINK"] # The following were omitted, they do not work currently ["IG SCREEN", "FB SCREEN"]
+        ["IG LINK", "DICE LINK", "SCREEN"]
     ]
     user = update.message.from_user
     logger.info(f'User {user["username"]} requested new event adding')
@@ -72,7 +70,7 @@ async def sendme(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "link" in text.lower():
         await update.message.reply_text("Send me the link",reply_markup=ReplyKeyboardRemove())
     elif "screen" in text.lower():
-        await update.message.reply_text("Send me the screenshot",reply_markup=ReplyKeyboardRemove())
+        await update.message.reply_text("Send me the screenshot along with a caption containing the name of the organizer and the link separated by a comma.\nE.g. Fanfulla5/A, www.facebook.com/events/gae651gea31.",reply_markup=ReplyKeyboardRemove())
     return ASKED_FOR_CONTENT
 
 
@@ -82,15 +80,38 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     On images does OCR and openai call, on links scrapes and openai call.
     Then asks if the produced JSON is correct."""
     
-    # if "screen" in context.user_data['type_of_content']:
-    #     file = await context.bot.get_file(update.message.photo[-1].file_id)
-    #     io_stream = io.BytesIO(b"")
-    #     await file.download_to_memory(io_stream)
-    #     extracted_text = pytesseract.image_to_string(Image.open(io_stream))
-    #     username, description = extracted_text.split(" ", 1)
-    #     response = json.loads(instagram_event(description, source='instagram', key=OPEN_AI_KEY))
-    #     context.user_data['event'] = response
-    if "link" in context.user_data['type_of_content']:
+    if "screen" in context.user_data['type_of_content']:
+        text = update.message.caption
+        try: 
+            organizer, link = text.split(',')
+        except ValueError:
+            logger.info(f"Wrong format for caption: {text}")
+            await update.message.reply_text("Wrong format for caption, please start again")
+            return ConversationHandler.END
+        except AttributeError:
+            logger.info(f"Wrong format for caption: {text}")
+            await update.message.reply_text("Wrong format for caption, please start again")
+            return ConversationHandler.END
+        file = await context.bot.get_file(update.message.photo[-1].file_id)
+        io_stream = io.BytesIO(b"")
+        await file.download_to_memory(io_stream)
+        extracted_text = pytesseract.image_to_string(Image.open(io_stream))
+        response = instagram_event(extracted_text)
+        if not response:
+            logger.info(f"OpenAI returned an empty response for {text}")
+            await update.message.reply_text("OpenAI returned an empty response.")
+            return ConversationHandler.END
+        event = {"name": response["name"],
+                "date": response["date"],
+                "artists":response["artists"],
+                "organizer":organizer,
+                "location":response["location"],
+                "price":response["price"],
+                "link":link,
+                "raw_descr":extracted_text}
+        context.user_data['event'] = event
+
+    elif "link" in context.user_data['type_of_content']:
         text = update.message.text
         context.user_data.pop('type_of_content')
         logger.info(f"Link received: {text}")

@@ -1,22 +1,22 @@
 import logging
 import os
-import arrow
 import json
 from langchain.prompts import PromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
+from datetime import datetime
 
 logger = logging.getLogger("mannaggia")
 
 def instagram_event(description):
-    template_string ="""You're tasked with extracting event information from the caption below delimited by triple backticks. The events you should focus on are clubbing events in Rome. If the event is related to theatre, cinema, film festival, or any non-musical event, YOU MUST return an empty JSON.
+    template_string =f'Today is {datetime.today().strftime("%A %d %B %Y")}.' + """You're tasked with extracting event information from the caption below delimited by triple backticks. The events you should focus on are clubbing events in Rome. If the event is related to theatre, cinema, film festival, or any non-musical event, YOU MUST return an empty JSON.
     caption: ```{caption}```
     {format_instructions}
     """
 
     response_schemas = [
-        ResponseSchema(name="date", description=f"Date formatted as %Y-%m-%d %H:%M:%S, year is {arrow.now().year} if not found in the caption"),
+        ResponseSchema(name="date", description="Date formatted as %Y-%m-%d %H:%M:%S"),
         ResponseSchema(name="name", description="Name of the clubbing event"),
         ResponseSchema(name="artists", description="Names of performing artists, separated by commas (they could be written as instagram usernames, in case remove the @"),
         ResponseSchema(name="location", description="Venue of the event"),
