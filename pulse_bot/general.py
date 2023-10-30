@@ -15,5 +15,5 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text(
         "Cancelled.", reply_markup=ReplyKeyboardRemove()
     )
-
+    logger.info("User cancelled the conversation.")
     return ConversationHandler.END

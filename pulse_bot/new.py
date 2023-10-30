@@ -68,9 +68,9 @@ async def sendme(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     context.user_data['type_of_content'] = text.lower()
     if "link" in text.lower():
-        await update.message.reply_text("Send me the link",reply_markup=ReplyKeyboardRemove())
+        await update.message.reply_text("Send me the link.",reply_markup=ReplyKeyboardRemove())
     elif "screen" in text.lower():
-        await update.message.reply_text("Send me the screenshot along with a caption containing the name of the organizer and the link separated by a comma.\nE.g. Fanfulla5/A, www.facebook.com/events/gae651gea31.",reply_markup=ReplyKeyboardRemove())
+        await update.message.reply_text("Send me the screenshot along with the caption containing the organizer's name and the link, separated by a comma.\nE.g. Fanfulla5/A, stase.​it/event/df6456gs6.",reply_markup=ReplyKeyboardRemove())
     return ASKED_FOR_CONTENT
 
 
@@ -82,15 +82,16 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
     if "screen" in context.user_data['type_of_content']:
         text = update.message.caption
+        context.user_data.pop('type_of_content')
         try: 
             organizer, link = text.split(',')
         except ValueError:
             logger.info(f"Wrong format for caption: {text}")
-            await update.message.reply_text("Wrong format for caption, please start again")
+            await update.message.reply_text("Wrong format for caption, please start again.")
             return ConversationHandler.END
         except AttributeError:
             logger.info(f"Wrong format for caption: {text}")
-            await update.message.reply_text("Wrong format for caption, please start again")
+            await update.message.reply_text("Wrong format for caption, please start again.")
             return ConversationHandler.END
         file = await context.bot.get_file(update.message.photo[-1].file_id)
         io_stream = io.BytesIO(b"")
@@ -98,7 +99,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         extracted_text = pytesseract.image_to_string(Image.open(io_stream))
         response = instagram_event(extracted_text)
         if not response:
-            logger.info(f"OpenAI returned an empty response for {text}")
+            logger.info(f"OpenAI returned an empty response for {text}.")
             await update.message.reply_text("OpenAI returned an empty response.")
             return ConversationHandler.END
         event = {"name": response["name"],
@@ -287,7 +288,7 @@ def create_new_conv_handler():
         entry_points=[CommandHandler("new", new)],
         states={
             SELECTED_CONTENT: [
-                MessageHandler(filters.Regex("^(IG LINK|DICE LINK|IG SCREEN|FB SCREEN)$"), sendme)],
+                MessageHandler(filters.Regex("^(IG LINK|DICE LINK|SCREEN)$"), sendme)],
             ASKED_FOR_CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO & (~ filters.COMMAND), answer)],
             CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
             SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
