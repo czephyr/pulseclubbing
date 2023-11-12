@@ -58,6 +58,34 @@ def get_program():
     return month, program_link
 
 
+def parse_time(event):
+    """Parse the time of the event from the HTML element
+    
+    Args:
+        event (bs4.element.Tag): HTML element containing the event
+    
+    Returns:
+        datetime.datetime: Time of the event"""
+    time = event.find('span', class_='_4n-j fsl').text
+    try: # Trying different time conventions
+        time = time.split(' ore ')[1]
+        if len(time) == 2:
+            time = datetime.strptime(time, '%H')
+        elif '.' in time and len(time) == 5:
+            time = time.replace('.', ':')
+            time = datetime.strptime(time, '%H:%M')
+    except IndexError:
+        time = time.split('dalle ')[1]
+        if len(time) == 2:
+            time = datetime.strptime(time, '%H')
+        elif '.' in time and len(time) == 5:
+            time = time.replace('.', ':')
+            time = datetime.strptime(time, '%H:%M')
+        else:
+            return None
+    return time
+
+
 def scrape():
     """Scrape the latest program for Fanfulla 5/A and insert the events in the database"""
     logger.info("Scraping Fanfulla...")
@@ -77,34 +105,28 @@ def scrape():
     events_list = []
     for event in events:
         event_dict = {}
-        try:
+        
+        try: # Parse the date
             day = event.find('h3').text.strip()
             day = ''.join(filter(str.isdigit, day))
             day = datetime.strptime(f'{day} {month} {year}', '%d %m %Y')
         except Exception as e:
-            print(e)
-            pass
+            logger.error(f'Error parsing date for event {event.find("h4").text} --- {e}')
+            continue
         event_dict['title'] = event.find('h4').text
         event_dict['location'] = 'Fanfulla 5/A Circolo Arci'
-        try:
-            time = event.find('span', class_='_4n-j fsl').text
-            try: # different time conventions
-                time = time.split(' ore ')[1]
-                if len(time) == 2:
-                    time = datetime.strptime(time, '%H')
-                elif '.' in time and len(time) == 5:
-                    time = time.replace('.', ':')
-                    time = datetime.strptime(time, '%H:%M')
-            except IndexError:
-                time = time.split('dalle ')[1]
-                if len(time) == 2:
-                    time = datetime.strptime(time, '%H')
-                elif '.' in time and len(time) == 5:
-                    time = time.replace('.', ':')
-                    time = datetime.strptime(time, '%H:%M')
-            time = time.strftime('%H:%M')
-            event_dict['date_and_time'] = day.replace(hour=int(time.split(':')[0]), minute=int(time.split(':')[1]))
+
+        try: # Parse the time
+            time = parse_time(event)
+            if not time:
+                logger.error(f"Error parsing time for event {event_dict['title']}")
+                continue
+            event_dict['date_and_time'] = day.replace(hour=time.hour, minute=time.minute)
             event_dict["date_and_time"] = event_dict["date_and_time"].strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            logger.error(f'Error converting time for event {event_dict["title"]} --- {e}')
+            continue
+        try:
             urls = [a['href'] for a in event.find_all('a', href=True) if 'facebook' in a['href'] and 'event' in a['href']]
             event_dict['url'] = urls[0] if urls else 'http://www.fanfulla5a.it/'
             # links = [a['href'] for a in event.find_all('a', href=True) if any(platform in a['href'] for platform in platforms)]
@@ -112,7 +134,7 @@ def scrape():
             event_dict['description'] = event.text.strip()
             events_list.append(event_dict)
         except AttributeError as e:
-            logger.error(f"Error for event {event_dict['title']} --- {e}")
+            logger.error(f"Error processing event {event_dict['title']} --- {e}")
             pass
 
     with sqlite3.connect('pulse.db') as connection:

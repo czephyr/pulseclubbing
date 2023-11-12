@@ -30,14 +30,22 @@ if __name__ == '__main__':
     date = utc.format('YYYY-MM-DD HH:mm')
     logger.info("-"*300)
     logger.info(f"Started new cronjob run {date}")
-
-    fanfulla.scrape()
-    trenta_formiche.scrape()
-    ra.scrape()
+    try:
+        fanfulla.scrape()
+    except Exception as e:
+        logger.error('SIGNIFICANT ERROR IN SCRAPING FANFULLA:', e)
+    try:
+        trenta_formiche.scrape()
+    except Exception as e:
+        logger.error('SIGNIFICANT ERROR IN SCRAPING TRENTA FORMICHE:', e)
+    try:
+        ra.scrape()
+    except Exception as e:
+        logger.error('SIGNIFICANT ERROR IN SCRAPING RA:', e)
     try:
         ig.scrape(delta_days=5)
     except Exception as e:
-        logger.error(e)
+        logger.error('SIGNIFICANT ERROR IN SCRAPING IG:', e)
     dice.scrape()
     with sqlite3.connect('pulse.db') as connection:
         # care, event dates have to be strings
