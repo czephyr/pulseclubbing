@@ -17,15 +17,18 @@ from telegram.ext import (
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from scrape_rome import db_handling,html_page
+from .utils import restricted
 from .general import cancel
 
 logger = logging.getLogger("mannaggia")
 
 ASKED_WHICH_EVENT, ASKED_IF_WAS_TECHNO = 15,16
 
+@restricted
 async def ask_which_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Asks to copy the event from the site"""
     await update.message.reply_text("Copy paste from the pulse site which event you want deleted. /cancel to cancel")
+    logging.info(f"User {update.message.from_user['username']} asked to delete an event")
     return ASKED_WHICH_EVENT
 
 async def delete_event(update: Update, context: ContextTypes.DEFAULT_TYPE):

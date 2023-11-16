@@ -30,6 +30,7 @@ from telegram.ext import (
     ContextTypes,
 )
 
+from .utils import restricted
 from scrape_rome.openai import instagram_event
 from scrape_rome import db_handling
 from scrape_rome import ig
@@ -42,6 +43,7 @@ OPEN_AI_KEY = os.getenv("OPENAI_API_KEY")
 
 SELECTED_CONTENT, ASKED_FOR_CONTENT, CREATED_EVENT, ASKED_IF_CORRECT, SELECTED_PARAMETER_TO_CORRECT, ASKED_FOR_CORRECTION = range(6)
 
+@restricted
 async def new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Asks about the kind of content youre sending"""
     reply_keyboard = [

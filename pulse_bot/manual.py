@@ -15,6 +15,7 @@ from telegram.ext import (
     ConversationHandler,
     ContextTypes,
 )
+from .utils import restricted
 from .general import cancel
 from .new import save_or_correct, ask_correction, correct, CREATED_EVENT, SELECTED_PARAMETER_TO_CORRECT, ASKED_FOR_CORRECTION
 
@@ -23,6 +24,7 @@ logger = logging.getLogger("mannaggia")
 MANUAL_START,MANUAL_NAME,MANUAL_DATE,MANUAL_ARTISTS,MANUAL_ORGANIZER,MANUAL_PRICE,MANUAL_LINK,MANUAL_DESCR = range(6, 14)
 
 #TODO: maybe fix this shit code
+@restricted
 async def manual_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Asks about the kind of content youre sending"""
     user = update.message.from_user

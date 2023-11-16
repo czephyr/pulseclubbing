@@ -12,9 +12,11 @@ from telegram.ext import (
     ContextTypes,
 )
 from dotenv import load_dotenv
+from pulse_bot.utils import restricted # Decorator to restrict access to certain users
 from pulse_bot.new import create_new_conv_handler
 from pulse_bot.manual import create_manual_conv_handler
 from pulse_bot.delete import delete_conv
+
 
 load_dotenv()
 TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -34,6 +36,7 @@ fh.setFormatter(formatter)
 logger.addHandler(ch)
 logger.addHandler(fh)
 
+@restricted
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Answers /start and explains the functionality of the bot"""
     await context.bot.send_message(
@@ -41,7 +44,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text="PulseRome started. Type /new to add an event, /manual to add a manual event and /delete to delete an event",
     )
 
-# /help command to explain the bot
+@restricted
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Answers /help and explains the functionality of the bot"""
     await context.bot.send_message(
