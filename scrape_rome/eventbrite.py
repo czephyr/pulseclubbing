@@ -18,6 +18,7 @@ def scrape_link(url):
         name = soup.find('h1', class_='event-title').text.strip()
         date = soup.find('time', class_='start-date')['datetime']
         time = soup.find('span', class_='date-info__full-datetime').text.strip()
+        logger.debug(f'Eventbrite time: {time}')
         start_time = time.split('-')[0].strip().split('·')[1].strip()
         start_time = convert_time(start_time)
         startdate = f'{date} {start_time}'
@@ -61,8 +62,12 @@ def convert_time(time):
         >>> convert_time('9pm')
         '21:00:00'
     """
-    if ':' in time:
-        standard_time = datetime.strptime(time, '%I:%M%p').strftime('%H:%M:%S')
-    else:
-        standard_time = datetime.strptime(time, '%I%p').strftime('%H:%M:%S')
-    return standard_time
+    try:
+        if ':' in time:
+            standard_time = datetime.strptime(time, '%I:%M%p').strftime('%H:%M:%S')
+        else:
+            standard_time = datetime.strptime(time, '%I%p').strftime('%H:%M:%S')
+        return standard_time
+    except Exception as e:
+        logger.error(f'Exception: {e} \n time: {time}')
+        return None
