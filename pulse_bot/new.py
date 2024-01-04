@@ -35,6 +35,7 @@ from scrape_rome.openai import instagram_event
 from scrape_rome import db_handling
 from scrape_rome import ig
 from scrape_rome import dice
+from scrape_rome import eventbrite
 from scrape_rome import html_page, utils
 from .general import cancel
 
@@ -47,11 +48,10 @@ SELECTED_CONTENT, ASKED_FOR_CONTENT, CREATED_EVENT, ASKED_IF_CORRECT, SELECTED_P
 async def new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Asks about the kind of content youre sending"""
     reply_keyboard = [
-        ["IG LINK", "DICE LINK", "SCREEN"]
+        ["IG LINK", "DICE LINK", "EVENTBRITE LINK", "SCREEN"]
     ]
     user = update.message.from_user
     logger.info(f'User {user["username"]} requested new event adding')
-
 
     await update.message.reply_text(
         "What content are you sending? /cancel to cancel",
@@ -147,6 +147,13 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             event = dice.scrape_link(text)
             if not event:
                 logger.info(f"Couldn't scrape Dice: {text}")
+                await update.message.reply_text("Couldn't scrape this link, sorry!")
+                return ConversationHandler.END
+            context.user_data['event'] = event
+        elif 'eventbrite' in text:
+            event = eventbrite.scrape_link(text)
+            if not event:
+                logger.info(f"Couldn't scrape Eventbrite: {text}")
                 await update.message.reply_text("Couldn't scrape this link, sorry!")
                 return ConversationHandler.END
             context.user_data['event'] = event
@@ -290,7 +297,7 @@ def create_new_conv_handler():
         entry_points=[CommandHandler("new", new)],
         states={
             SELECTED_CONTENT: [
-                MessageHandler(filters.Regex("^(IG LINK|DICE LINK|SCREEN)$"), sendme)],
+                MessageHandler(filters.Regex("^(IG LINK|DICE LINK|EVENTBRITE LINK|SCREEN)$"), sendme)],
             ASKED_FOR_CONTENT: [MessageHandler(filters.TEXT | filters.PHOTO & (~ filters.COMMAND), answer)],
             CREATED_EVENT: [CallbackQueryHandler(save_or_correct)],
             SELECTED_PARAMETER_TO_CORRECT: [MessageHandler(filters.Regex(
