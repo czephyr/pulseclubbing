@@ -120,4 +120,4 @@ def scrape():
             date_object = datetime.strptime(event["startTime"],'%Y-%m-%dT%H:%M:%S.%f')
             formatted_date_str = date_object.strftime("%Y-%m-%d %H:%M:%S")
             logger.info(f"Inserting event {event['title']} from {event['club_name']} with date {formatted_date_str}")
-            db_handling.insert_event_if_no_similar(conn=connection,event=(event['title'],formatted_date_str,event['artists'],club_name,event['venue_name'],"-1",f"https://ra.co/events/{event['id']}",""))
+            db_handling.insert_event_if_no_similar(conn=connection,event=(event['title'],formatted_date_str,event['artists'],event['venue_name'],event['venue_name'],"-1",f"https://ra.co/events/{event['id']}",""))
