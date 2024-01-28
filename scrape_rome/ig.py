@@ -14,7 +14,6 @@ logger = logging.getLogger("mannaggia")
 
 USERNAMES_TO_SCRAPE = {
     "Angelo Mai": "angelo_mai_roma",
-    # "Forte Antenne": "forte_antenne", # Removed 'cause they post too much
     "Nuur": "nuur.xyz",
     "Trenta Formiche": "trenta_formiche",
     "Magma": "arci_magma",
@@ -22,11 +21,12 @@ USERNAMES_TO_SCRAPE = {
     "Kurage": "kurage_roma",
     "Campo Magnetico": "campomagneticoroma",
     "Blaze": "blaze.roma",
-    # "Baronato": "baronato4bellezze", # Never announce beforehand, but events always take place on Tuesday, we could also just add them with a cronjob
-    # "Teatro delle Bellezze": "teatrodellebellezze", # TODO Creates posts with multiple events in the description, we really need to add it but we need an handler for multiple events
     "Vetro Enoteca": "vetro_enoteca",
     "Club Industria": "club_industria",
     "Reveries": "reveries_rome",
+    # "Baronato": "baronato4bellezze", # Never announce beforehand, but events always take place on Tuesday, we could also just add them with a cronjob
+    # "Teatro delle Bellezze": "teatrodellebellezze", # TODO Creates posts with multiple events in the description, we really need to add it but we need an handler for multiple events
+    # "Forte Antenne": "forte_antenne", # Removed 'cause they post too much
 }
 
 
@@ -41,7 +41,10 @@ def return_username_caption(shortcode):
         logger.error(f"Error loading session file: {e}")
         pass
     post = instaloader.Post.from_shortcode(L.context, shortcode)
-    return post.caption, post.owner_username, (post.date).strftime("%Y-%m-%d %H:%M:%S")
+    caption = post.caption
+    username = post.owner_username
+    date = (post.date).strftime("%Y-%m-%d %H:%M:%S")
+    return caption, username, date
 
 
 def scrape(delta_days):
