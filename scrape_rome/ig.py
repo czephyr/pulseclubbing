@@ -18,6 +18,15 @@ USERNAMES_TO_SCRAPE = {
     "Nuur": "nuur.xyz",
     "Trenta Formiche": "trenta_formiche",
     "Magma": "arci_magma",
+    "Club Arciliuto": "clubarciliuto",
+    "Kurage": "kurage_roma",
+    "Campo Magnetico": "campomagneticoroma",
+    "Blaze": "blaze.roma",
+    # "Baronato": "baronato4bellezze", # Never announce beforehand, but events always take place on Tuesday, we could also just add them with a cronjob
+    # "Teatro delle Bellezze": "teatrodellebellezze", # TODO Creates posts with multiple events in the description, we really need to add it but we need an handler for multiple events
+    "Vetro Enoteca": "vetro_enoteca",
+    "Club Industria": "club_industria",
+    "Reveries": "reveries_rome",
 }
 
 
@@ -32,7 +41,7 @@ def return_username_caption(shortcode):
         logger.error(f"Error loading session file: {e}")
         pass
     post = instaloader.Post.from_shortcode(L.context, shortcode)
-    return post.caption, post.owner_username
+    return post.caption, post.owner_username, (post.date).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def scrape(delta_days):
@@ -64,6 +73,7 @@ def scrape(delta_days):
                 logger.info(f"Handling post: instagram.com/p/{post.shortcode}")
                 caption = post.caption
                 shortcode = post.shortcode
+                date = (post.date).strftime("%Y-%m-%d %H:%M:%S")
                 link = f"https://instagram.com/p/{shortcode}"
                 # No post caption, no scraping
                 if caption:
@@ -71,7 +81,7 @@ def scrape(delta_days):
                     # If the shortcode is not in the db it means this is a new post and it needs to be scraped
                     if not db_handling.is_igpost_shortcode_in_db(connection, shortcode):
                         db_handling.add_igpost_shortcode(connection,shortcode)
-                        response = instagram_event(caption)
+                        response = instagram_event(caption, date)
                         if not response:
                             logger.info("OpenAI returned an empty response")
                             continue

@@ -9,8 +9,9 @@ from datetime import datetime
 
 logger = logging.getLogger("mannaggia")
 
-def instagram_event(description):
+def instagram_event(description, date: str):
     template_string =f'Today is {datetime.today().strftime("%A %d %B %Y")}.' + """You're tasked with extracting event information from the caption below delimited by triple backticks. The events you should focus on are clubbing events in Rome. If the event is related to theatre, cinema, film festival, or any non-musical event, YOU MUST return an empty JSON.
+    This has been posted on Instagram on {date}:
     caption: ```{caption}```
     {format_instructions}
     """
@@ -27,7 +28,7 @@ def instagram_event(description):
     format_instructions = output_parser.get_format_instructions()
     prompt = PromptTemplate(
         template=template_string,
-        input_variables=["caption"],
+        input_variables=["caption", "date"],
         partial_variables={"format_instructions": format_instructions}
     )
 
@@ -37,13 +38,13 @@ def instagram_event(description):
         messages=[
             HumanMessagePromptTemplate.from_template(template_string)  
         ],
-        input_variables=["caption"],
+        input_variables=["caption", "date"],
         partial_variables={"format_instructions": format_instructions},
         output_parser=output_parser
     )
     chain = LLMChain(llm=llm, prompt=prompt, output_parser=output_parser)
     try:
-        response = chain.run(caption=description)
+        response = chain.run(caption=description, date=date)
         if response:
             logger.info(f"OpenAI response: {response}")
             if response['name'] == '':

@@ -99,7 +99,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         io_stream = io.BytesIO(b"")
         await file.download_to_memory(io_stream)
         extracted_text = pytesseract.image_to_string(Image.open(io_stream))
-        response = instagram_event(extracted_text)
+        response = instagram_event(extracted_text,datetime.today().strftime("%Y-%m-%d %H:%M:%S")) # This is not the real date, we have to find a way to extract it from the picture 
         if not response:
             logger.info(f"OpenAI returned an empty response for {text}.")
             await update.message.reply_text("OpenAI returned an empty response.")
@@ -128,8 +128,8 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 logger.info(f"This post has already been scraped: {text}")
                 await update.message.reply_text("This post has already been scraped.")
                 return ConversationHandler.END
-            description, username = ig.return_username_caption(shortcode)
-            result = instagram_event(description)
+            description, username, date = ig.return_username_caption(shortcode)
+            result = instagram_event(description, date)
             if not result:
                 logger.info(f"OpenAI returned an empty response for {text}")
                 await update.message.reply_text("OpenAI returned an empty response.")
