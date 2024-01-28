@@ -81,7 +81,7 @@ def scrape():
                     event["title"],
                     event["date_and_time"],
                     "", # No way to retrieve artists here at the moment
-                    "30 Formiche",
+                    "Trenta Formiche",
                     "Via Del Mandrione 3",
                     "Piccolo contributo + Tessera Arci",
                     event["url"],

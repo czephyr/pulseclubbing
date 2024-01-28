@@ -18,7 +18,7 @@ def scrape_link(url):
         name = soup.find('h1', class_='event-title').text.strip()
         date = soup.find('time', class_='start-date')['datetime']
         time = soup.find('span', class_='date-info__full-datetime').text.strip()
-        logger.debug(f'Eventbrite time: {time}')
+        logger.error(f'Eventbrite time: {time}')
         start_time = time.split('-')[0].strip().split('·')[1].strip()
         start_time = convert_time(start_time)
         startdate = f'{date} {start_time}'
