@@ -9,7 +9,7 @@ def update_webpage(db_connection, file_to_write:str, cronjob_date):
 
     events_in_db = return_valid_events_by_month(db_connection,cronjob_date)
 
-    # group events by day
+    # Group events by day
     events_by_day = defaultdict(list)
     for event in events_in_db:
         # Parse the date string and extract only the date part
@@ -46,6 +46,28 @@ def update_webpage(db_connection, file_to_write:str, cronjob_date):
             html_content += '''
                     </ul>
                 </div>'''
+    if file_to_write == "www/gen_index.html":
+        html_content += f'''
+            <div class="link-with-arrow">
+                <a href="/next_month">
+                    See Next Month
+                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>'''
+    else:
+        html_content += f'''
+        <div class="link-with-arrow home-link">
+            <a href="/">
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+                Back to this Month
+            </a>
+        </div>'''
 
     html_content += LOWER_PART
     
@@ -108,7 +130,7 @@ def get_upper_part(is_next_month):
 
         h5 {
             font-family: var(--font-main);
-            color: var(--heading-color);
+            color: #dd8521;
             font-size: 1.1em;
             line-height:0.9;
             margin-bottom: 6px; 
@@ -284,9 +306,51 @@ def get_upper_part(is_next_month):
             80% { content: "(stase)"; }
             100% { content: "((stase))"; }
         }
+
         h1::before {
             content: "(((stase)))";
             animation: pulse 2s infinite;
+        }
+
+        .link-with-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .link-with-arrow a {
+            display: inline-flex;
+            align-items: center;
+            color: var(--link-color);
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: color 0.3s ease;
+        }
+
+        .link-with-arrow a:hover {
+            text-decoration: underline;
+            color: var(--visited-color);
+        }
+
+        .link-with-arrow .arrow-icon {
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .link-with-arrow a:hover .arrow-icon {
+            transform: translateX(5px);
+        }
+
+        .home-link .arrow-icon {
+            margin-left: 8px;
+            margin-right: 0;
+            transform: rotate(180deg);
+        }
+
+        .home-link a:hover .arrow-icon {
+            transform: translateX(-5px) rotate(180deg);
         }
         </style>
         </head>
