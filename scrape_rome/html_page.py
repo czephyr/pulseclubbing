@@ -63,6 +63,7 @@ def get_upper_part(is_next_month):
         <html lang="en">
         <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+        <script defer data-domain="stase.it" src="https://stats.stase.it/js/script.js"></script>
         <style>
 
 
