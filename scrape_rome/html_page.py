@@ -360,7 +360,7 @@ def get_upper_part(is_next_month):
             <a class="title" href="/">
                 <h1></h1>
             </a>
-            <p class="telegram-link"><a href="https://t.me/quindistase" target="_blank">Join the Telegram group: <span class="underline-text" style="color: #dd8521;">@quindistase</span></a></p>
+            <p class="telegram-link">Selected clubbing events in Rome. <a href="https://t.me/quindistase" target="_blank">Join the Telegram group: <span class="underline-text" style="color: #dd8521;">@quindistase</span></a></p>
             <nav>
                 <p><a href="/">Home</a></p><p>""" + next_month_button +"""</oomp>
             </nav>
