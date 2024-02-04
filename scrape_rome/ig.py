@@ -9,6 +9,7 @@ from ftfy import fix_text
 from . import db_handling
 from .openai import instagram_event
 import re
+import random
 
 logger = logging.getLogger("mannaggia")
 
@@ -49,6 +50,9 @@ def return_username_caption(shortcode):
 
 def scrape(delta_days):
     logger.info(f"Scraping IG with delta {delta_days}...")
+    wait_time = random.randint(1000,20000)
+    time.sleep(wait_time)
+    logger.info(f"Will wait {wait_time}")
     L = instaloader.Instaloader()
     try:
         L.load_session_from_file(
@@ -62,26 +66,25 @@ def scrape(delta_days):
     SINCE = datetime.today()
     UNTIL = SINCE - timedelta(days=delta_days)
 
-    # DB is locked from concurrency
-    with sqlite3.connect("pulse.db") as connection:
-        for organizer, user in USERNAMES_TO_SCRAPE.items():
-            logger.info(f"scraping insta user {user} ({organizer})")
+    for organizer, user in USERNAMES_TO_SCRAPE.items():
+        logger.info(f"scraping insta user {user} ({organizer})")
 
-            profile = instaloader.Profile.from_username(L.context, user)
-            posts = profile.get_posts()
-            for post in takewhile(
-                lambda p: (p.date > UNTIL or p.is_pinned),
-                dropwhile(lambda p: p.date >= SINCE, posts),
-            ):
-                logger.info(f"Handling post: instagram.com/p/{post.shortcode}")
-                caption = post.caption
-                shortcode = post.shortcode
-                date = (post.date).strftime("%Y-%m-%d %H:%M:%S")
-                link = f"https://instagram.com/p/{shortcode}"
-                # No post caption, no scraping
-                if caption:
-                    caption = fix_text(caption.lower())
-                    # If the shortcode is not in the db it means this is a new post and it needs to be scraped
+        profile = instaloader.Profile.from_username(L.context, user)
+        posts = profile.get_posts()
+        for post in takewhile(
+            lambda p: (p.date > UNTIL or p.is_pinned),
+            dropwhile(lambda p: p.date >= SINCE, posts),
+        ):
+            logger.info(f"Handling post: instagram.com/p/{post.shortcode}")
+            caption = post.caption
+            shortcode = post.shortcode
+            date = (post.date).strftime("%Y-%m-%d %H:%M:%S")
+            link = f"https://instagram.com/p/{shortcode}"
+            # No post caption, no scraping
+            if caption:
+                caption = fix_text(caption.lower())
+                # If the shortcode is not in the db it means this is a new post and it needs to be scraped
+                with sqlite3.connect("pulse.db") as connection:
                     if not db_handling.is_igpost_shortcode_in_db(connection, shortcode):
                         db_handling.add_igpost_shortcode(connection,shortcode)
                         response = instagram_event(caption, date)
@@ -101,8 +104,8 @@ def scrape(delta_days):
                         db_handling.insert_event_if_no_similar(connection, event)
                     else:
                         logger.info("already scraped post, no action")
-                else:
-                    logger.info("no caption found for post")
+            else:
+                logger.info("no caption found for post")
 
-                time.sleep(15)
-            time.sleep(60)
+            time.sleep(300 + random.randint(0,300))
+        time.sleep(300 + random.randint(0,300))
