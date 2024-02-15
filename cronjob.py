@@ -30,6 +30,8 @@ if __name__ == '__main__':
     date = utc.format('YYYY-MM-DD HH:mm')
     logger.info("-"*300)
     logger.info(f"Started new cronjob run {date}")
+    with sqlite3.connect('pulse.db') as connection:
+        html_page.update_webpage(connection,"www/gen_index.html",datetime.today())
     try:
         fanfulla.scrape()
     except Exception as e:

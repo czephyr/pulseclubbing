@@ -18,7 +18,7 @@ logger = logging.getLogger("mannaggia")
 def init_db(conn):
     """initializes new db new db"""
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, name TEXT, date TEXT, artists TEXT, organizer TEXT, location TEXT, price REAL, link TEXT, raw_descr TEXT, is_valid INT DEFAULT 1, is_clubbing INT DEFAULT 1)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, name TEXT, date TEXT, artists TEXT, organizer TEXT, location TEXT, price REAL, link TEXT, raw_descr TEXT, is_valid INT DEFAULT 1, is_clubbing INT DEFAULT 1, scraping_timestamp timestamp DEFAULT NULL)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS ig_posts (id INTEGER PRIMARY KEY, shortcode TEXT)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS visit_stats (id INTEGER PRIMARY KEY, date TEXT, count INTEGER)''')
     conn.commit()
@@ -74,8 +74,9 @@ def insert_event_if_no_similar(conn, event):
     if utils.check_similarity((name, date_str, artists, organizer, location, price, link, raw_descr), rows):
         return None
     else:
-        insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link,raw_descr) VALUES(?,?,?,?,?,?,?,?)"
-        cur.execute(insert_query, (name, date_str, artists, organizer, location, price, link, raw_descr))
+        timestamp = datetime.now()
+        insert_query = "INSERT INTO events(name,date,artists,organizer,location,price,link,raw_descr,scraping_timestamp) VALUES(?,?,?,?,?,?,?,?,?)"
+        cur.execute(insert_query, (name, date_str, artists, organizer, location, price, link, raw_descr, timestamp))
         conn.commit()
         logger.info("Inserted successfully")
         return True
