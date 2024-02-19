@@ -97,11 +97,18 @@ def is_igpost_shortcode_in_db(conn, shortcode):
     rows = cur.fetchall()
     return len(rows) > 0
 
-def return_valid_events_by_month(conn, date):
+def return_valid_events_by_month(conn, date): # This has been dismissed
     """Return valid events from the db which are in the same month as the date passed"""
     cur = conn.cursor()
     day_events_query = "SELECT * FROM events WHERE is_valid = 1 AND date LIKE ? || '-' || ? || '-%'"
     cur.execute(day_events_query, (date.strftime('%Y'), date.strftime('%m')))
+    return cur.fetchall()
+
+def return_valid_events_by_date(conn, start_date, end_date):
+    """Return valid events from the db within the specified date range"""
+    cur = conn.cursor()
+    day_events_query = "SELECT * FROM events WHERE is_valid = 1 AND date BETWEEN ? AND ? ORDER BY date ASC"
+    cur.execute(day_events_query, (start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')))
     return cur.fetchall()
 
 def update_is_clubbing(conn, event_id, is_clubbing):
