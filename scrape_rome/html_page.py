@@ -2,8 +2,28 @@ from datetime import datetime, timedelta, date
 from collections import defaultdict
 import logging 
 from .db_handling import return_valid_events_by_month, return_valid_events_by_date
+import paramiko
+import os
 
 logger = logging.getLogger("mannaggia")
+
+def write_ssh(html:str, file_path:str):
+    private_key = paramiko.RSAKey.from_private_key_file(os.getenv("SSH_KEY_TO_DIGITALOCEAN"))
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    client.connect(os.getenv("DIGITALOCEAN_IP"), port=os.getenv("DIGITALOCEAN_PORT"), username=os.getenv("DIGITALOCEAN_USERNAME"), pkey=private_key)
+    sftp = client.open_sftp()
+
+    remote_file_path = f'/home/pulseclubbing/{file_path}'
+
+    with sftp.open(remote_file_path, 'w') as remote_file:
+        logger.info(f"Writing {file_path} page remotely!")
+        remote_file.write(html)
+    sftp.close()
+    client.close()
+
+
 
 def update_webpage(db_connection, file_to_write:str, cronjob_date):
 
@@ -86,9 +106,9 @@ def update_webpage(db_connection, file_to_write:str, cronjob_date):
     html_content += LOWER_PART
     
     # Write the HTML content to a file
-    with open(file_to_write, 'w', encoding='utf-8') as file:
-        logger.info("Writing html page!")
-        file.write(html_content)
+    write_ssh(html=html_content, file_path=file_to_write)
+    # with open(file_to_write, 'w', encoding='utf-8') as file:
+    #     file.write(html_content)
 
 def get_display_date_range(today):
     """
