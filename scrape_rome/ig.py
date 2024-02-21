@@ -52,8 +52,8 @@ def return_username_caption(shortcode):
 def scrape(delta_days):
     logger.info(f"Scraping IG with delta {delta_days}...")
     wait_time = random.randint(1000,20000)
-    time.sleep(wait_time)
     logger.info(f"Will wait {wait_time}")
+    time.sleep(wait_time)
     L = instaloader.Instaloader()
     try:
         L.load_session_from_file(
@@ -72,6 +72,9 @@ def scrape(delta_days):
 
         profile = instaloader.Profile.from_username(L.context, user)
         posts = profile.get_posts()
+        wait_time = 300 + random.randint(0,300)
+        logger.info(f"Will wait {wait_time}")
+        time.sleep(wait_time)
         for post in takewhile(
             lambda p: (p.date > UNTIL or p.is_pinned),
             dropwhile(lambda p: p.date >= SINCE, posts),
@@ -108,5 +111,7 @@ def scrape(delta_days):
             else:
                 logger.info("no caption found for post")
 
-            time.sleep(300 + random.randint(0,300))
-        time.sleep(300 + random.randint(0,300))
+
+        wait_time = 300 + random.randint(0,300)
+        logger.info(f"Will wait {wait_time}")
+        time.sleep(wait_time)
