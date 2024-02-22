@@ -45,7 +45,7 @@ def get_program():
     
     # Get the program page
     response = requests.get('http://www.fanfulla5a.it/category/mese/')
-    soup = BeautifulSoup(response.text, 'lxml')
+    soup = BeautifulSoup(response.text, 'html.parser')
 
     # Find the link to the program
     program_link = None
@@ -100,7 +100,7 @@ def scrape():
         year = datetime.now().year
     logger.info(f"Found program link for Fanfulla 5/A: {link}")
     html = requests.get(link).content
-    soup = BeautifulSoup(html, 'lxml')
+    soup = BeautifulSoup(html, 'html.parser')
     events = soup.find_all('div', class_='siteorigin-widget-tinymce')
     events_list = []
     for event in events:
