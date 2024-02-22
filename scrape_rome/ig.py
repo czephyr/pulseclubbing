@@ -52,7 +52,6 @@ def return_username_caption(shortcode):
 def scrape(delta_days):
     logger.info(f"Scraping IG with delta {delta_days}...")
     wait_time = random.randint(1000,20000)
-    logger.info(f"Will wait {wait_time}")
     time.sleep(wait_time)
     L = instaloader.Instaloader()
     try:
@@ -113,5 +112,4 @@ def scrape(delta_days):
 
 
         wait_time = 300 + random.randint(0,300)
-        logger.info(f"Will wait {wait_time}")
         time.sleep(wait_time)
