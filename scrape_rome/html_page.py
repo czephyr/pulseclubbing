@@ -1,11 +1,15 @@
 from datetime import datetime, timedelta, date
 from collections import defaultdict
 import logging 
-from .db_handling import return_valid_events_by_month, return_valid_events_by_date
+from .db_handling import return_valid_events_by_date
 import paramiko
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
+IS_LOCAL = os.getenv("RUN_LOCALLY") == 'true'
 logger = logging.getLogger("mannaggia")
+
 
 def write_ssh(html:str, file_path:str):
     private_key = paramiko.RSAKey.from_private_key_file(os.getenv("SSH_KEY_TO_DIGITALOCEAN"))
@@ -106,9 +110,10 @@ def update_webpage(db_connection, file_to_write:str, cronjob_date):
     html_content += LOWER_PART
     
     # Write the HTML content to a file
-    write_ssh(html=html_content, file_path=file_to_write)
-    # with open(file_to_write, 'w', encoding='utf-8') as file:
-    #     file.write(html_content)
+    if not IS_LOCAL:
+        write_ssh(html=html_content, file_path=file_to_write)
+        # with open(file_to_write, 'w', encoding='utf-8') as file:
+        #     file.write(html_content)
 
 def get_display_date_range(today):
     """

@@ -19,7 +19,11 @@ from pulse_bot.delete import delete_conv
 
 
 load_dotenv()
-TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
+IS_LOCAL = os.getenv("RUN_LOCALLY") == 'true'
+if IS_LOCAL:
+    TG_TOKEN = os.getenv("LOCAL_TELEGRAM_TOKEN")
+else:
+    TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
 logger = logging.getLogger("mannaggia")
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s | %(filename)s | %(levelname)s - %(message)s')
