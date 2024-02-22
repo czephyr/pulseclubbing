@@ -112,8 +112,9 @@ def update_webpage(db_connection, file_to_write:str, cronjob_date):
     # Write the HTML content to a file
     if not IS_LOCAL:
         write_ssh(html=html_content, file_path=file_to_write)
-        # with open(file_to_write, 'w', encoding='utf-8') as file:
-        #     file.write(html_content)
+    else:
+        with open(file_to_write, 'w', encoding='utf-8') as file:
+            file.write(html_content)
 
 def get_display_date_range(today):
     """
