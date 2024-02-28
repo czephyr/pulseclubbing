@@ -1,11 +1,11 @@
 requests
 bs4
-pandas
+# pandas
 python-dateutil
 python-telegram-bot[job-queue]
-pytesseract 
-Pillow
-opencv-python-headless
+# pytesseract 
+# Pillow
+# opencv-python-headless
 python-dotenv
 openai
 instaloader

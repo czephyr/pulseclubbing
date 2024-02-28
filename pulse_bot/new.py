@@ -6,8 +6,8 @@ import logging
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from PIL import Image
-import pytesseract
+# from PIL import Image
+# import pytesseract
 
 from telegram import (
     Update,
@@ -83,36 +83,37 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Then asks if the produced JSON is correct."""
     
     if "screen" in context.user_data['type_of_content']:
-        text = update.message.caption
-        context.user_data.pop('type_of_content')
-        try: 
-            organizer, link = text.split(',')
-        except ValueError:
-            logger.info(f"Wrong format for caption: {text}")
-            await update.message.reply_text("Wrong format for caption, please start again.")
-            return ConversationHandler.END
-        except AttributeError:
-            logger.info(f"Wrong format for caption: {text}")
-            await update.message.reply_text("Wrong format for caption, please start again.")
-            return ConversationHandler.END
-        file = await context.bot.get_file(update.message.photo[-1].file_id)
-        io_stream = io.BytesIO(b"")
-        await file.download_to_memory(io_stream)
-        extracted_text = pytesseract.image_to_string(Image.open(io_stream))
-        response = instagram_event(extracted_text,datetime.today().strftime("%Y-%m-%d %H:%M:%S")) # This is not the real date, we have to find a way to extract it from the picture 
-        if not response:
-            logger.info(f"OpenAI returned an empty response for {text}.")
-            await update.message.reply_text("OpenAI returned an empty response.")
-            return ConversationHandler.END
-        event = {"name": response["name"],
-                "date": response["date"],
-                "artists":response["artists"],
-                "organizer":organizer,
-                "location":response["location"],
-                "price":response["price"],
-                "link":link,
-                "raw_descr":extracted_text}
-        context.user_data['event'] = event
+        # text = update.message.caption
+        # context.user_data.pop('type_of_content')
+        # try: 
+        #     organizer, link = text.split(',')
+        # except ValueError:
+        #     logger.info(f"Wrong format for caption: {text}")
+        #     await update.message.reply_text("Wrong format for caption, please start again.")
+        #     return ConversationHandler.END
+        # except AttributeError:
+        #     logger.info(f"Wrong format for caption: {text}")
+        #     await update.message.reply_text("Wrong format for caption, please start again.")
+        #     return ConversationHandler.END
+        # file = await context.bot.get_file(update.message.photo[-1].file_id)
+        # io_stream = io.BytesIO(b"")
+        # await file.download_to_memory(io_stream)
+        # extracted_text = pytesseract.image_to_string(Image.open(io_stream))
+        # response = instagram_event(extracted_text,datetime.today().strftime("%Y-%m-%d %H:%M:%S")) # This is not the real date, we have to find a way to extract it from the picture 
+        # if not response:
+        #     logger.info(f"OpenAI returned an empty response for {text}.")
+        #     await update.message.reply_text("OpenAI returned an empty response.")
+        #     return ConversationHandler.END
+        # event = {"name": response["name"],
+        #         "date": response["date"],
+        #         "artists":response["artists"],
+        #         "organizer":organizer,
+        #         "location":response["location"],
+        #         "price":response["price"],
+        #         "link":link,
+        #         "raw_descr":extracted_text}
+        # context.user_data['event'] = event
+        return ConversationHandler.END
 
     elif "link" in context.user_data['type_of_content']:
         text = update.message.text
