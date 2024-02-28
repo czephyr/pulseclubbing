@@ -86,6 +86,7 @@ if __name__ == "__main__":
     application.add_handler(new_conversation_handler)
     application.add_handler(manual_conversation_handler)
     application.add_handler(delete_conv_handler)
+    application.add_handler(edit_date_conv_handler)
     application.add_error_handler(error_handler)
 
     application.run_polling()
