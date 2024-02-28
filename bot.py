@@ -16,6 +16,7 @@ from pulse_bot.utils import restricted # Decorator to restrict access to certain
 from pulse_bot.new import create_new_conv_handler
 from pulse_bot.manual import create_manual_conv_handler
 from pulse_bot.delete import delete_conv
+from pulse_bot.edit_date import edit_date_conv_handler
 
 
 load_dotenv()
@@ -79,6 +80,7 @@ if __name__ == "__main__":
     new_conversation_handler = create_new_conv_handler()
     manual_conversation_handler = create_manual_conv_handler()
     delete_conv_handler = delete_conv()
+    edit_date_handler = edit_date_conv_handler()
 
     application.add_handler(start_handler)
     application.add_handler(new_conversation_handler)

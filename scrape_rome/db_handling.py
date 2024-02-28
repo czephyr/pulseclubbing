@@ -122,3 +122,14 @@ def update_is_clubbing(conn, event_id, is_clubbing):
         return row_exists[0]
     else:
         return None
+
+def update_event_date(conn, name, organizer, new_date):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM events WHERE name=? AND organizer=?", (name, organizer,))
+    row_exists = cur.fetchone()
+    if row_exists:
+        cur.execute("UPDATE events SET date = ? WHERE id=?", (new_date, str(row_exists[0]),))
+        conn.commit()
+        return row_exists[0]
+    else:
+        return None
