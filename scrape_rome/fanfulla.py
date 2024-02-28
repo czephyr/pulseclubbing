@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import calendar
-from . import db_handling
+from . import db_handling, openai, utils
 import sqlite3
 
 logger = logging.getLogger("mannaggia")
@@ -23,9 +23,13 @@ def get_program():
         next_month = today.replace(day=1) + timedelta(days=31)
         month = next_month.month
         month_name = next_month.strftime("%B")
+        year = next_month.year
+        logger.info(f"Getting program for next month: {month_name} {year}")
     else:
         month = today.month
         month_name = today.strftime("%B")
+        year = today.year
+        logger.info(f"Getting program for current month: {month_name} {year}")
     
     en_to_it = {
         "January": "Gennaio",
@@ -52,7 +56,8 @@ def get_program():
     articles = soup.find_all('article')
     for article in articles:
         header = article.find('h2', class_='archive-title')
-        if header and month_name_it in header.text:
+        logger.debug(f"Checking header: {header.text.strip()}")
+        if header and month_name_it in header.text and str(year) in header.text.strip():
             program_link = header.find('a')['href']
             break
     return month, program_link
@@ -113,7 +118,8 @@ def scrape():
         except Exception as e:
             logger.error(f'Error parsing date for event {event.find("h4").text} --- {e}')
             continue
-        event_dict['title'] = event.find('h4').text
+        title = event.find('h4').text
+        event_dict['title'] = utils.clean_text(title, source='comparison')
         event_dict['location'] = 'Fanfulla 5/A Circolo Arci'
 
         try: # Parse the time
@@ -132,6 +138,17 @@ def scrape():
             # links = [a['href'] for a in event.find_all('a', href=True) if any(platform in a['href'] for platform in platforms)]
             # event_dict['artists_links'] = '; '.join(links) # These two lines are commented because at the moment we don't need to store artists links
             event_dict['description'] = event.text.strip()
+            
+            # TODO: Enrich the event_dict with OpenAI
+            # event_enrichment = openai.website_event(title=event_dict['title'], text=event_dict['description'])
+            # # Check if the event_info is not empty and enrich the event_dict accordingly
+            # if not event_enrichment:
+            #     logger.info("OpenAI returned an empty response")
+            #     continue
+            # event_dict['title'] = event_enrichment['name']
+            # event_dict['artists'] = event_enrichment['artists']
+            # event_dict['price'] = 'Piccolo contributo + Tessera Arci' if event_enrichment['price'] == '' else event_enrichment['price']              
+            
             events_list.append(event_dict)
         except AttributeError as e:
             logger.error(f"Error processing event {event_dict['title']} --- {e}")
@@ -145,10 +162,10 @@ def scrape():
                     event=(
                         event['title'],
                         event['date_and_time'],
-                        '', # No way to have artists here at the moment
+                        '', # event['artists'],
                         'Fanfulla 5/A',
                         'Via Fanfulla da Lodi, 5/a',
-                        'Piccolo contributo + Tessera Arci',
+                        'Piccolo contributo + Tessera Arci', # event['price'],
                         event['url'],
                         event_dict['description']
                     )
