@@ -26,7 +26,8 @@ USERNAMES_TO_SCRAPE = {
     "Club Industria": "club_industria",
     "Reveries": "reveries_rome",
     "Baronato": "baronato4bellezze", # Never announce beforehand, but events always take place on Tuesday, we could also just add them with a cronjob
-    "Lisergica": "lisergica__"
+    "Lisergica": "lisergica__",
+    "Canapa Caffè": "canapa_caffe_sound_therapy",
     # "Teatro delle Bellezze": "teatrodellebellezze", # TODO Creates posts with multiple events in the description, we really need to add it but we need an handler for multiple events
     # "Forte Antenne": "forte_antenne", # Removed 'cause they post too much
 }
