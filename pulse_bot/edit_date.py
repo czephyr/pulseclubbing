@@ -42,7 +42,7 @@ async def update_event_date_handler(update: Update, context: ContextTypes.DEFAUL
     new_date_str = update.message.text
     event_info = context.user_data.pop('event_name_to_edit', None)
     organizer, event_name = event_info.split(" || ")
-    
+    organizer= organizer.removeprefix("» ") 
     try:
         # Validate and format the new date
         new_date = datetime.strptime(new_date_str, "%Y-%m-%d %H:%M:%S")

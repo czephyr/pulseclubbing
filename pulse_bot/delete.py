@@ -35,6 +35,7 @@ async def delete_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Saves kind of content that the user has selected and propts for the content"""
     text = update.message.text
     organizer, name = text.split(" || ")
+    organizer= organizer.removeprefix("» ") 
     with sqlite3.connect('pulse.db') as connection:
         deleted = db_handling.delete_row_by_name_and_organizer(connection,name,organizer)
     if deleted:

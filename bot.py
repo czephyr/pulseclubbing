@@ -1,5 +1,6 @@
 import os
 import logging
+import strtobool
 from datetime import timedelta, datetime
 import sqlite3
 from scrape_rome import db_handling
@@ -18,13 +19,12 @@ from pulse_bot.manual import create_manual_conv_handler
 from pulse_bot.delete import delete_conv
 from pulse_bot.edit_date import edit_date_conv_handler
 
-
 load_dotenv()
-IS_LOCAL = os.getenv("RUN_LOCALLY") == 'true'
-if IS_LOCAL:
+if strtobool(os.getenv("RUN_LOCALLY","false")):
     TG_TOKEN = os.getenv("LOCAL_TELEGRAM_TOKEN")
 else:
     TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
+    
 logger = logging.getLogger("mannaggia")
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s | %(filename)s | %(levelname)s - %(message)s')
