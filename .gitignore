@@ -11,3 +11,4 @@ pulse.db
 *.html
 .instagram-session-*
 app.log
+downloaded_files/driver_fixing.lock

@@ -18,3 +18,4 @@ arrow
 langchain==0.1.8
 paramiko
 langchain-community
+seleniumbase
