@@ -1,6 +1,6 @@
 import argparse
 import sqlite3
-from scrape_rome import html_page, ig, ra, fanfulla, dice, trenta_formiche
+from scrape_rome import html_page, ig, ra, fanfulla, dice, trenta_formiche, reveries
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
@@ -71,7 +71,16 @@ if __name__ == '__main__':
             logger.error('SIGNIFICANT ERROR IN SCRAPING IG:', e)
 
     if should_run("dice"):
-        dice.scrape()
+        try:
+            dice.scrape()
+        except Exception as e:
+            logger.error('SIGNIFICANT ERROR IN SCRAPING DICE:', e)
+
+    if should_run("reveries"):
+        try:
+            reveries.scrape()
+        except Exception as e:
+            logger.error('SIGNIFICANT ERROR IN SCRAPING REVERIES:', e)
 
     if should_run("html"):
         with sqlite3.connect('pulse.db') as connection:
