@@ -1,5 +1,5 @@
 import logging
-import requests
+from seleniumbase import Driver
 import time
 import json
 from . import db_handling
@@ -11,13 +11,8 @@ logger = logging.getLogger("mannaggia")
 
 VENUES_TO_SCRAPE = {
     # 'Monk': 'monk---sala-teatro-o58r', # Monk occasionally has orrible events, we'll check it manually
-    'Forte Antenne': 'forte-antenne-96yd',
+    # 'Forte Antenne': 'forte-antenne-96yd',
     'Hacienda': 'hacienda-6568',
-}
-
-REQUEST_HEADER = {
-    "User-Agent": "Chrome/91.0.4472.124", 
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
 }
 
 def scrape():
@@ -27,8 +22,11 @@ def scrape():
             logger.info(f'Scraping {venue} on Dice')
             url = f'https://dice.fm/venue/{venue_id}'
             try:
-                r = requests.get(url, headers=REQUEST_HEADER)
-                soup = BeautifulSoup(r.content, 'html.parser')
+                driver = Driver(uc=True)
+                driver.uc_open_with_reconnect(url)
+                html_content = driver.get_page_source()
+                driver.quit()
+                soup = BeautifulSoup(html_content, 'html.parser')
                 data = soup.find('script', type='application/ld+json').string
                 data = json.loads(data)
                 for event in data['event']:
@@ -54,8 +52,11 @@ def scrape():
 def scrape_link(url):
     logger.info(f'Scraping single {url} on Dice')
     try:
-        r = requests.get(url, headers=REQUEST_HEADER)
-        soup = BeautifulSoup(r.content, 'html.parser')
+        driver = Driver(uc=True)
+        driver.uc_open_with_reconnect(url)
+        html_content = driver.get_page_source()
+        driver.quit()
+        soup = BeautifulSoup(html_content, 'html.parser')
         data = soup.find('script', type='application/ld+json').string
         data = json.loads(data)
         name = fix_text(data['name'])
@@ -64,7 +65,7 @@ def scrape_link(url):
         organizer = data['location']['name']
         address = data['location']['address']
         description = fix_text(data['description'])
-        price = soup.find('div', class_='EventDetailsCallToAction__Price-sc-12zjeg-6')
+        price = soup.find('div', class_='EventDetailsCallToAction__Price-sc-77f1a107-6')
         price = ' '.join([p.text for p in price.find_all('span')])
         try:
             # We are currently getting the entire lineup as a single string,
