@@ -60,9 +60,9 @@ def update_webpage(db_connection, file_to_write:str, cronjob_date):
         
         if today <= date_obj <= end_date:
             if date_obj == today and file_to_write == "www/gen_index.html":
-                day_display = "Today"
+                day_display = f"Today - {date_obj.strftime('%A %d %B')}"
             elif date_obj == tomorrow and file_to_write == "www/gen_index.html":
-                day_display = "Tomorrow"
+                day_display = f"Tomorrow - {date_obj.strftime('%A %d %B')}"
             else:
                 day_display = date_obj.strftime('%A %d %B')
             
