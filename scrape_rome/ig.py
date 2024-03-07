@@ -10,6 +10,7 @@ from . import db_handling
 from .openai import instagram_event
 import re
 import random
+from telegram import Bot
 
 logger = logging.getLogger("mannaggia")
 
@@ -86,6 +87,8 @@ def scrape(delta_days):
             shortcode = post.shortcode
             date = (post.date).strftime("%Y-%m-%d %H:%M:%S")
             link = f"https://instagram.com/p/{shortcode}"
+
+            to_channel = f"{link} \n"
             # No post caption, no scraping
             if caption:
                 caption = fix_text(caption.lower())
@@ -107,12 +110,16 @@ def scrape(delta_days):
                             link,
                             caption,
                         )
+                        to_channel = to_channel + str(event)
                         db_handling.insert_event_if_no_similar(connection, event)
                     else:
                         logger.info("already scraped post, no action")
+                        to_channel = to_channel + "already scraped"
             else:
                 logger.info("no caption found for post")
+                to_channel = to_channel + "no caption found"
 
+            Bot(token=os.getenv("TELEGRAM_TOKEN")).send_message(chat_id=-1002041332676,text=to_channel)
 
         wait_time = 300 + random.randint(0,300)
         time.sleep(wait_time)
