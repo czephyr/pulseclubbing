@@ -6,6 +6,7 @@ import logging
 import instaloader
 import sqlite3
 from ftfy import fix_text
+import requests
 from . import db_handling
 from .openai import instagram_event
 import re
@@ -119,7 +120,12 @@ def scrape(delta_days):
                 logger.info("no caption found for post")
                 to_channel = to_channel + "no caption found"
 
-            Bot(token=os.getenv("TELEGRAM_TOKEN")).send_message(chat_id=-1002041332676,text=to_channel)
+            
+            token = os.getenv("TELEGRAM_TOKEN")
+            chat_id = "-1002041332676"
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            data = {"chat_id": chat_id, "text": to_channel}
+            response = requests.post(url, data=data)
 
         wait_time = 300 + random.randint(0,300)
         time.sleep(wait_time)
