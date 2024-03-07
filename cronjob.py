@@ -48,7 +48,7 @@ if __name__ == '__main__':
         return tasks_to_run is None or task_name in tasks_to_run
 
     Bot(token=os.getenv("TELEGRAM_TOKEN")).send_message(chat_id=-1002041332676,text="testtesttest")
-
+    print("aoooooo")
     # Execute tasks based on the provided arguments or run all if no --only
     if should_run("fanfulla"):
         try:
