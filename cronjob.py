@@ -6,6 +6,8 @@ from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 import logging
 import arrow
+import os
+from telegram import Bot
 
 if __name__ == '__main__':
     load_dotenv()
@@ -44,6 +46,8 @@ if __name__ == '__main__':
     def should_run(task_name):
         # Run if tasks_to_run is None (meaning --only wasn't used) or task_name is in tasks_to_run
         return tasks_to_run is None or task_name in tasks_to_run
+
+    Bot(token=os.getenv("TELEGRAM_TOKEN")).send_message(chat_id=-1002041332676,text="testtesttest")
 
     # Execute tasks based on the provided arguments or run all if no --only
     if should_run("fanfulla"):
