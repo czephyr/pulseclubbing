@@ -2,7 +2,7 @@ import os
 import logging
 from datetime import timedelta, datetime
 import sqlite3
-from scrape_rome import db_handling
+from scrape_rome import db_handling, utils
 from telegram import (
     Update
 )
@@ -12,7 +12,7 @@ from telegram.ext import (
     ContextTypes,
 )
 from dotenv import load_dotenv
-from pulse_bot.utils import restricted # Decorator to restrict access to certain users
+from pulse_bot.utils import restricted, create_tg_post # Decorator to restrict access to certain users
 from pulse_bot.new import create_new_conv_handler
 from pulse_bot.manual import create_manual_conv_handler
 from pulse_bot.delete import delete_conv
@@ -58,22 +58,23 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown",
     )
 
-async def callback_minute(context: ContextTypes.DEFAULT_TYPE):
-    with sqlite3.connect('pulse.db') as connection:
-        days = db_handling.visits_stats(connection)
-    msg = "Here are the visit counts from the past week \n"
-    for day,count in days:
-        msg += f"*{day} {datetime.strptime(day, '%Y-%m-%d').strftime('%A')}*: {count}\n"
-    await context.bot.send_message(chat_id=474799562, text=msg, parse_mode="Markdown",)
+async def weekend_post(context: ContextTypes.DEFAULT_TYPE):
+    logger.info("Writing weekly post")
+    today = datetime.now().date().strftime("%Y-%m-%d")
+    sunday = (today + timedelta(days=4)).strftime("%Y-%m-%d")
+    msg = create_tg_post(today, sunday)
+    logger.info(msg)
+    await context.bot.send_message(chat_id=-1002034170536, text=msg, parse_mode="Markdown")
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     logger.error("Exception while handling an update:", exc_info=context.error)
+
 
 if __name__ == "__main__":
     application = ApplicationBuilder().token(TG_TOKEN).build()
     job_queue = application.job_queue
 
-    job_minute = job_queue.run_repeating(callback_minute, interval=timedelta(days=7), first=datetime.fromisoformat('2011-10-20 23:59:00.000'))
+    job_minute = job_queue.run_repeating(weekend_post, interval=timedelta(minutes=1), first=datetime.now())
 
     start_handler = CommandHandler("start", start)
     help_handler = CommandHandler("help", help)
