@@ -3,6 +3,8 @@ from unidecode import unidecode
 import re
 from fuzzywuzzy import fuzz
 import logging
+import os
+import requests
 
 logger = logging.getLogger("mannaggia")
 
@@ -67,3 +69,10 @@ def get_insta_shortcode(insta_link):
 def check_date_format(date:str):
     format = r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$'
     return re.match(format, date)
+
+def send_tg_log(text):
+    token = os.getenv("TELEGRAM_TOKEN")
+    chat_id = "-1002041332676"
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    data = {"chat_id": chat_id, "text": text}
+    response = requests.post(url, data=data)

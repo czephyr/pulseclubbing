@@ -54,7 +54,7 @@ def delete_row_by_name_and_organizer(conn, name, organizer):
 
 def insert_event_if_no_similar(conn, event):
     """Insert new event in db if no similar ones by organizer and name are found in the same date
-       Returns None if successful"""
+       Returns None if unsuccessful"""
     cur = conn.cursor()
     name,date,artists,organizer,location,price,link,raw_descr = event
 

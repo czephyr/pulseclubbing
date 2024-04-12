@@ -1,8 +1,10 @@
 import os
 import logging
-from datetime import timedelta, datetime
+import locale
+from datetime import timedelta, datetime,time
 import sqlite3
-from scrape_rome import db_handling
+from collections import defaultdict
+from scrape_rome import db_handling,utils
 from telegram import (
     Update
 )
@@ -59,12 +61,40 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def callback_minute(context: ContextTypes.DEFAULT_TYPE):
-    with sqlite3.connect('pulse.db') as connection:
-        days = db_handling.visits_stats(connection)
-    msg = "Here are the visit counts from the past week \n"
-    for day,count in days:
-        msg += f"*{day} {datetime.strptime(day, '%Y-%m-%d').strftime('%A')}*: {count}\n"
-    await context.bot.send_message(chat_id=474799562, text=msg, parse_mode="Markdown",)
+    locale.setlocale(locale.LC_TIME, 'it_IT')
+    with sqlite3.connect('pulse.db') as db_connection:
+        events_in_db = db_handling.return_valid_events_by_date(db_connection, datetime.now(), datetime.now() + timedelta(days=3))
+    msg = "Here are some events: \n"
+    
+    modified_events = []
+
+    for event in events_in_db:
+        # Convert the date string at event[2] to a date object and back to a string
+        new_date = datetime.strptime(event[2], '%Y-%m-%d %H:%M:%S').date()
+        
+        # Create a new tuple with the modified date and add it to the modified_events list
+        # This example assumes your tuple has 5 elements (indexed from 0 to 4)
+        # Adjust the tuple creation as per your actual data structure
+        modified_event = (event[0], event[1], new_date, event[4], event[7])
+        modified_events.append(modified_event)
+
+    # sort events by date
+    sorted_events = sorted(modified_events, key=lambda event: event[2])
+
+    # Group events by date
+    events_by_date = defaultdict(list)
+    for event in sorted_events:
+        events_by_date[event[2]].append(event)
+
+    for date, events in events_by_date.items():
+        msg += f"{date.strftime('%A %d %B')}:\n"
+        for event in events:
+            msg += f"- {event[1]} @ **{event[3]}**: [link]({event[4]})\n"
+        msg+="\n"
+    
+    msg+="\npiu' avanti? Li trovi su [stase.it](stase.it)"
+    await context.bot.send_message(chat_id="-1002041332676",text=msg, parse_mode="Markdown")
+    print(msg)
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     logger.error("Exception while handling an update:", exc_info=context.error)
@@ -73,7 +103,8 @@ if __name__ == "__main__":
     application = ApplicationBuilder().token(TG_TOKEN).build()
     job_queue = application.job_queue
 
-    job_minute = job_queue.run_repeating(callback_minute, interval=timedelta(days=7), first=datetime.fromisoformat('2011-10-20 23:59:00.000'))
+    # at 14:00UTC+2 on friday
+    job_minute = job_queue.run_daily(callback_minute, time(hour=12, minute=5, second=0), days=[5])
 
     start_handler = CommandHandler("start", start)
     help_handler = CommandHandler("help", help)

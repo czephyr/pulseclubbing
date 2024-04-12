@@ -6,8 +6,8 @@ import logging
 import instaloader
 import sqlite3
 from ftfy import fix_text
-import requests
 from . import db_handling
+from .utils import send_tg_log 
 from .openai import instagram_event
 import re
 import random
@@ -56,6 +56,7 @@ def return_username_caption(shortcode):
 
 def scrape(delta_days):
     logger.info(f"Scraping IG with delta {delta_days}...")
+    send_tg_log(f"Starting ig run on {date.today()}")
     wait_time = random.randint(1000,20000)
     time.sleep(wait_time)
     L = instaloader.Instaloader()
@@ -73,6 +74,7 @@ def scrape(delta_days):
 
     for organizer, user in USERNAMES_TO_SCRAPE.items():
         logger.info(f"scraping insta user {user} ({organizer})")
+        send_tg_log(f"Scraping ig user {user} ({organizer})")
 
         profile = instaloader.Profile.from_username(L.context, user)
         posts = profile.get_posts()
@@ -89,7 +91,7 @@ def scrape(delta_days):
             date = (post.date).strftime("%Y-%m-%d %H:%M:%S")
             link = f"https://instagram.com/p/{shortcode}"
 
-            to_channel = f"{link} \n"
+            to_channel = f"{link} \n\n"
             # No post caption, no scraping
             if caption:
                 caption = fix_text(caption.lower())
@@ -111,7 +113,7 @@ def scrape(delta_days):
                             link,
                             caption,
                         )
-                        to_channel = to_channel + str(event)
+                        to_channel = to_channel + f"date: {response['date']}\n{organizer} - {response['name']}\n{caption}"
                         db_handling.insert_event_if_no_similar(connection, event)
                     else:
                         logger.info("already scraped post, no action")
@@ -120,12 +122,7 @@ def scrape(delta_days):
                 logger.info("no caption found for post")
                 to_channel = to_channel + "no caption found"
 
-            
-            token = os.getenv("TELEGRAM_TOKEN")
-            chat_id = "-1002041332676"
-            url = f"https://api.telegram.org/bot{token}/sendMessage"
-            data = {"chat_id": chat_id, "text": to_channel}
-            response = requests.post(url, data=data)
+            send_tg_log(to_channel)
 
         wait_time = 300 + random.randint(0,300)
         time.sleep(wait_time)
