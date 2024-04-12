@@ -32,6 +32,9 @@ USERNAMES_TO_SCRAPE = {
     "Canapa Caffè": "canapa_caffe_sound_therapy",
     "Hyperacustica": "hyperacustica",
     "BSMNT": "bsmnt__basement",
+    "Frisson": "frissonroma",
+    "Manifesto": "manifestofest",
+    "Maison Binario": "maisonbinario",
     # "Teatro delle Bellezze": "teatrodellebellezze", # TODO Creates posts with multiple events in the description, we really need to add it but we need an handler for multiple events
     # "Forte Antenne": "forte_antenne", # Removed 'cause they post too much
 }

@@ -14,7 +14,7 @@ from telegram.ext import (
     ContextTypes,
 )
 from dotenv import load_dotenv
-from pulse_bot.utils import restricted # Decorator to restrict access to certain users
+from pulse_bot.utils import restricted, create_tg_post # Decorator to restrict access to certain users
 from pulse_bot.new import create_new_conv_handler
 from pulse_bot.manual import create_manual_conv_handler
 from pulse_bot.delete import delete_conv
@@ -98,6 +98,7 @@ async def callback_minute(context: ContextTypes.DEFAULT_TYPE):
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     logger.error("Exception while handling an update:", exc_info=context.error)
+
 
 if __name__ == "__main__":
     application = ApplicationBuilder().token(TG_TOKEN).build()

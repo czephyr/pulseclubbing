@@ -1,4 +1,8 @@
 from functools import wraps
+from scrape_rome.db_handling import return_valid_events_by_date
+import sqlite3
+import datetime
+
 
 allowed_ids = [474799562, 290855718]
 
@@ -27,3 +31,24 @@ def restricted(func):
 
         return await func(update, context, *args, **kwargs)
     return wrapped
+
+def create_tg_post(start_date, end_date):
+    with sqlite3.connect('pulse.db') as connection:
+        events = return_valid_events_by_date(connection, start_date, end_date)
+    message = "Questo weekend Stase.it consiglia:\n"
+    event_by_date = {}
+    for event in events:
+        name = event[0]
+        date = event[1].split(' ')[0]
+        organizer = event[2]
+        link = event[6]
+        event_msg = f"» @{organizer} || {name}\n{link}\n\n"
+        if date in event_by_date:
+            event_by_date[date] += event_msg
+        else:
+            event_by_date[date] = event_msg
+    for date, msg in event_by_date.items():
+        date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+        day = date_obj.strftime('%A %d %B')
+        message += f"{day}\n{msg}\n"
+    return message
