@@ -22,7 +22,11 @@ CLUBS = { # IDs must be strings to perform the request correctly
     'Brancaleone': '4916',
     'Rashomon': '5861',
     'La Redazione': '210246',
-    'Officine Farneto': '19276'
+    'Officine Farneto': '19276',
+    'Magick Bar': '153706',
+    'Città Dell\'Altra Economia': '46480',
+    'Piazza Gianicolo': '217099',
+    'Villa Ada': '106550',
 }
 
 def scrape():

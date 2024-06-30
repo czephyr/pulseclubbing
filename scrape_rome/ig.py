@@ -35,6 +35,10 @@ USERNAMES_TO_SCRAPE = {
     "Frisson": "frissonroma",
     "Manifesto": "manifestofest",
     "Maison Binario": "maisonbinario",
+    "Dinamica Music Club": "dinamicamusiclub",
+    "Soffio": "soffio_fregene_",
+    # "Magick Bar": "magickbar", # Inserted in Resident Advisor
+    # "Rebel Rebel": "rebelrebelrome", # Inserted in Resident Advisor
     # "Teatro delle Bellezze": "teatrodellebellezze", # TODO Creates posts with multiple events in the description, we really need to add it but we need an handler for multiple events
     # "Forte Antenne": "forte_antenne", # Removed 'cause they post too much
 }
