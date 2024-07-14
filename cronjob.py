@@ -72,11 +72,11 @@ if __name__ == '__main__':
         except Exception as e:
             logger.error('SIGNIFICANT ERROR IN SCRAPING IG:', e)
 
-    if should_run("dice"):
-        try:
-            dice.scrape()
-        except Exception as e:
-            logger.error('SIGNIFICANT ERROR IN SCRAPING DICE:', e)
+    # if should_run("dice"):
+    #     try:
+    #         dice.scrape()
+    #     except Exception as e:
+    #         logger.error('SIGNIFICANT ERROR IN SCRAPING DICE:', e)
 
     if should_run("reveries"):
         try:

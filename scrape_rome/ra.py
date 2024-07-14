@@ -9,27 +9,112 @@ from . import utils
 from . import db_handling
 import logging 
 
+import cloudscraper
+from bs4 import BeautifulSoup
+import json
+
 logger = logging.getLogger("mannaggia")
 
 CLUBS = { # IDs must be strings to perform the request correctly
     'Forte Antenne': '190667',
     'Hotel Butterfly': '139767',
     # 'Wood Natural Bar': '216590', # Solo stagione estiva
-    'Cieloterra': '165998',
-    'Andrea Doria': '32487',
-    'Nuur': '215874',
+    # 'Cieloterra': '165998',
+    # 'Andrea Doria': '32487',
+    # 'Nuur': '215874',
     # 'Circolo Degli Illuminati': '36463',
-    'Brancaleone': '4916',
-    'Rashomon': '5861',
-    'La Redazione': '210246',
-    'Officine Farneto': '19276',
+    # 'Brancaleone': '4916',
+    # 'Rashomon': '5861',
+    # 'La Redazione': '210246',
+    # 'Officine Farneto': '19276',
     'Magick Bar': '153706',
-    'Città Dell\'Altra Economia': '46480',
+    # 'Città Dell\'Altra Economia': '46480',
     'Piazza Gianicolo': '217099',
     'Villa Ada': '106550',
+    'Cave di tufo': '215874'
 }
 
+
 def scrape():
+
+    def get_artists(json_data):
+        artists = {}
+        for x in json_data["props"]["apolloState"]:
+            if 'Artist' in x:
+                id = json_data["props"]["apolloState"][x]['id']
+                name = json_data["props"]["apolloState"][x]['name']
+                artists[id] = name
+        return artists
+
+    def get_events(json_data, artists_dict, venue_name):
+        venue_events = []
+        for x in json_data["props"]["apolloState"]:
+            if 'Event' in x and 'Image' not in x:
+                try:
+                    event = json_data["props"]["apolloState"][x]
+                    id = event['id']
+                    title = event['title']
+                    try:
+                        date = event['startTime']
+                    except KeyError:
+                        date = event['date']
+                    url = f'https://ra.co/events/{id}'
+                    artists_ids_list = []
+                    for artist in event['artists']:
+                        artist_id = artist['__ref'].split(':')[-1]
+                        artists_ids_list.append(artist_id)
+                    artists = ', '.join([artists_dict[artist_id] for artist_id in artists_ids_list])
+
+                    flat_event = {
+                        'title': title,
+                        'date': date,
+                        'artists': artists,
+                        'venue_name': venue_name,
+                        'url': url
+                    }
+
+                    venue_events.append(flat_event)
+
+                except Exception as exception:
+                    print(f'Error {exception} in scraping an event in {club_name}: {exception}')
+                    continue
+
+        return venue_events
+    
+    logger.info("Scraping RA...")
+
+    # Initializing the scraper
+    scraper = cloudscraper.create_scraper(browser={'browser': 'firefox','platform': 'windows','mobile': False})
+
+    # Creating an empty list to store the flattened events for all clubs
+    flattened_events = []
+
+    for club_name, club_value in CLUBS.items():
+        try:
+            logger.info(f"Scraping club {club_name} with ID {club_value}")
+            response = scraper.get(f"https://ra.co/clubs/{club_value}/events").content
+            soup = BeautifulSoup(response, 'html.parser')
+            events = soup.find('script', type='application/json').string
+            json_data = json.loads(events)
+            artists = get_artists(json_data)
+            events = get_events(json_data, artists, club_name)
+            flattened_events.extend(events)
+            time.sleep(2+random.uniform(0, 1))
+        except Exception as exception:
+            logger.error(f'Error {exception} in scraping {club_name}: {exception}')
+            # continue # Maybe is better to not continue if an error occurs
+
+    with sqlite3.connect('pulse.db') as connection:
+        for event in flattened_events:
+            date_object = datetime.strptime(event['date'],'%Y-%m-%dT%H:%M:%S.%f')
+            formatted_date = date_object.strftime('%Y-%m-%d %H:%M:%S')
+            event = (event['title'], formatted_date, event['artists'], event['venue_name'], event['venue_name'], '-1', event['url'], '')
+            db_handling.insert_event_if_no_similar(connection, event)
+
+    logger.info("RA scraping finished")
+
+
+def scrape_from_json(): # Deprecated method
     logger.info("Scraping RA...")
     # Creating an empty list to store the flattened events for all clubs
     flattened_events = []
@@ -118,7 +203,7 @@ def scrape():
                 flattened_events.append(flat_event)
                 time.sleep(2+random.uniform(0, 1))
         except Exception as exception:
-            logger.error(f'Error {exception} in scraping {club_name}')
+            logger.error(f'Error {exception} in scraping {club_name}: {exception}')
 
     with sqlite3.connect('pulse.db') as connection:
         for event in flattened_events:
